@@ -1,0 +1,1438 @@
+Materia de la instalación---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Gestor de paquetes: Es una herramienta de software que automatiza el proceso de instalar, actualizar, eliminar programas o librerías en un sistema. 
+Ej: En Ubuntu en vez de buscar el código fuente de Python, descargarlo, compilarlo e instalarlo, solo abrimos la terminal y ponemos sudo apt install python3 y el gestor de paquetes de Ubuntu se encarga de todo.
+
+
+
+Compilador: Es un programa que traduce código fuente (escrito en un lenguaje de programación) a código maquina (o bytecode) que la computadora entiende y ejecuta.
+
+
+
+Bucket: Es un repositorio de Git que contiene archivos .json que le dicen al gestor de paquetes cómo instalar programas.
+
+
+
+Al programar hay que pensar en 
+*Mantenibilidad: Es la facilidad en la que un sistema puede corregirse, mejorarse, adaptarse, extenderse en el tiempo (durar). Mantener un sistema es la mayor parte del costo.
+*Extensibilidad: Es la capacidad de incorporar cambios que no afecten en gran medida a lo que ya existe. Para conseguir esto hay que tener bajo acoplamiento.
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+Configuración de Intellij---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Trabajar con Intellij: Instalamos el plugin de Scala y al crear un nuevo proyecto hay que seleccionar a Scala a la izquierda.
+El proyecto se crea con varias carpetas
+*.idea -> son cosas de Intellij, no se sube al repo (.gitignore)
+*.bsp -> son cosas de Intellij, no se sube al repo (.gitignore)
+*src -> va el código fuente real, si va al repo
+*target -> sbt guarda todo lo que se genera cuando se compila o ejecuta el proyecto, basura
+
+También tiene varios archivos
+*.gitignore -> archivo de texto que le dice a git qué archivos/carpetas ignorar
+*build.sbt -> archivo de configuración principal del proyecto sbt, se define nombre, versión, librerías externas, configuraciones de compilación
+
+Para crear el archivo donde pondremos nuestro código, vamos src -> main -> Scala -> click derecho -> new -> Scala class
+
+
+
+sbt: Significa Scala Build Tool, es lo que maneja el proyecto usando Scala
+
+
+
+Trabajar en la terminal con Scala: Para trabajar con Scala dentro de la terminal hay que descargar Scala y agregarla al PATH de Windows. Por otro lado, al usar Intellij y trabajar Scala, este se descarga como un plugin en Intellij por lo cual podemos trabajar desde ahí sin tener que instalar Scala en el sistema y tener que ponerla en el PATH. La ventaja de trabajar en terminal es que podemos probar líneas de código de forma rápida.
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+Materia SCALA---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Hacer comentarios en Scala: Igual que en C, // para comentarios de una línea y /* */ para comentarios en bloque (/* al inicio y */ al final). 
+
+
+
+Lenguaje de tipado estático: El tipo de cada variable se determina y verifica en la compilación, es decir, antes de ejecutar el programa y no se puede cambiar después. Por ese motivo, al definir una variable hay que declarar el tipo de dato que es y se deben definir las variables antes de usarlas. 
+Ej de lenguajes estáticos: C (ya lo vimos), C++, Java, Scala.
+
+
+
+Lenguaje de tipado dinámico: El tipo de cada variable se determina y verifica en la ejecución. Así que no es necesario que al definir una variable se declare el tipo de dato. 
+Ej: Python.
+
+
+
+Lenguaje de tipado fuerte: No permite operar entre distintos tipos. 
+Ej: "5" + 3 da error pero "5" + str(3) no da error. 
+Ej de lenguajes de tipado fuerte: Python, Java, Scala, C#.
+
+
+
+Lenguaje de tipado débil: Si permite operar entre distintos tipos. Ej: "5" + 3 no da error. Ej de lenguajes de tipado débil: JavaScript, C
+
+
+
+Errores en tiempo de compilación: Son errores que ocurren cuando se compila el código. Los lenguajes de tipado estático revisan el tipo de cada variable al compilar, si se detecta un error de tipo se detecta un error en tiempo de compilación.
+En Scala si declaro una variable como inmutable y luego le cambio su valor, también dará un error en tiempo de compilación.
+Un lenguaje de tipado dinámico también puede tener errores de compilación pero no producidos por el tipo,  por ejemplo, un error de sintaxis como que falte una coma producirá un error en tiempo de compilación en un lenguaje dinámico (y también en un lenguaje estático).
+
+
+
+Errores en tiempo de ejecución: Son errores que ocurren cuando se ejecuta el código. Los lenguajes de tipado dinámico revisan el tipo de cada variable al ejecutar, si se detecta un error de tipo se detecta un error en tiempo de ejecución.
+Un lenguaje de tipado estático también puede tener errores de ejecución pero no producidos por el tipo, por ejemplo, definir la variable val resultado = 10/n donde val n = 0 no produce un error de compilación porque los tipos están bien (y no hay error de sintaxis) pero al momento de ejecutar el código se encuentra con una división entre 0 lo cual produce un error en tiempo de ejecución (Ojo si fuera directamente val resultado = 10/0 si se detecta el error en tiempo de compilación).
+
+
+
+Scala: Programaremos en Scala pero las ideas que aprenderemos son aplicables en el resto de lenguajes.
+
+
+
+Diseñar un programa: Para diseñar hay que entender el contexto y así poder realizar los trade-offs necesarios.
+
+
+
+Tipos de datos en Scala:
+*int (números enteros) 
+*float (números decimales) 
+*double (números decimales con más precisión) 
+*char (un solo carácter) -> 2 bytes (En C se usaba 1 byte, Scala usa 2 porque no usa ASCII sino que usa Unicode UTF-16) 
+*boolean (true o false)
+*Unit (no almacena dato, se usa cuando una función no devuelve nada. Ej: una función que solo hace println())
+
+
+
+Unicode UTF-16: Es como ASCII pero hay dos partes
+1*Asigna un número a cada carácter (pero tiene más números y por ende considera mas caracteres que ASCII)
+2*Decide cómo empaquetar ese número en bytes. Donde si el número al pasarlo a número binario cabe en 16 bits, lo deja así y usa 2 bytes. Pero si el número al pasarlo a número binario no cabe en 16 bits, usa una formula matemática que parte el número en dos bloques de 16 bits y usa 4 bytes, es decir, dos char consecutivos.
+
+
+
+Variantes de int en Scala: Para ser más especifico sobre el tipo de entero podemos usar otros tipos de datos.
+*Byte -> 1 byte (8 bits)
+*short -> 2 bytes (16 bits)
+*int -> 4 bytes (32 bits)
+*long -> 8 bytes (64 bits) 
+
+
+
+Signed y unsigned en Scala: En Scala no existen los tipos de datos unsigned, todos los datos se consideran signed.
+
+
+
+AnyVal y AnyRef: En Scala cuando se define una variable, esa variable se puede guardar de dos formas posibles
+*Por valor: La variable se guarda en su propio espacio de memoria. 
+Ej: Un int tiene 4 bytes reservados en la memoria y al definir un int , se guarda en esos 4 bytes
+*Por referencia: La variable guarda una dirección que apunta a otro lugar, y en ese lugar tiene un espacio de memoria donde se guarda. 
+Ej: Un String se guarda en otro lugar de la memoria el cual cambia de tamaño según el largo del String
+
+Un AnyVal es el grupo de los tipos de datos que se guardan por valor (Int, float, double, char, ...) y el AnyRef es el grupo de los tipos de datos que se guardan por referencia (String, List, Map, Clases que definimos, ...).
+
+
+
+Variables en Scala: A pesar de que dijimos que Scala es de tipado estático entonces tenemos que dar el tipo de la variable para poder definirla, esto no es 100% necesario pues Scala (a diferencia de C) sabe reconocer el tipo de la variable (Ej: Sabe que 1 es un int), pero si nosotros queremos explicitar el tipo de la variable también lo podemos hacer (Ej: Queremos que 1 sea un long).
+
+Por otro lado, lo que si o si tenemos que decirle a Scala es si la variable que vamos a poner es val (inmutable: No se puede cambiar el valor de la variable) o es var (mutable: Si se puede cambiar el valor de la variable), siempre vamos a preferir definir las variables como inmutables e ir cambiándolas a mutables a medida que lo necesitemos. 
+Así las formas de definir una variable son
+* val nombreVariable = valor o val nombreVariable: tipoDato = valor
+* var nombreVariable = valor o val nombreVariable: tipoDato = valor
+
+tipoDato debe tener la primera letra en mayúscula (Int, Float, Char, Double, Long)
+En particular, para definir una variable que sea un float o un long, hay que ponerla la letra f o la letra L, respectivamente al final del valor. Ej: val variable1: Float = 3.01f
+
+
+
+Formas de escribir en Scala: Al igual que en C, para variables usamos camelCase y para constantes usamos SCREAMING_SNAKE_CASE.
+
+
+
+Funciones en Scala: Son similares a C y Python (como una mezcla), son de la siguiente forma 
+def nombreFuncion(parámetros): tipoDatoQueRetorna = {
+ //Código
+}
+
+Donde los parámetros de la función deben ser de la forma parámetro: tipoDato. 
+Además, dentro de la función no hay que declarar si los parámetros de la función son val o var pues se asume que son val, si necesitamos que el valor de un parámetro cambie dentro de la función hay que definir una variable var que sea igual a ese parámetro y luego trabajar sobre esa variable, no directamente con el parámetro.
+
+Ej:
+def suma(x: Int, y: Int): Int ={
+ x+y	//esto es return x+y
+}
+
+A diferencia de C y de Python donde si se pone un return al final de la función (o a veces solo un print()), en Scala no se pone el return sino que la ultima línea del código de la función es lo que se retorna. Además, el tipo de esta última linea debe coincidir con el tipo que declaramos al definir la función.
+
+Es importante notar que si tenemos una función que retorna un tipo que NO es Unit, asignar un valor a una variable NUNCA puede ser la ultima linea de esa función pues esa acción se considera de tipo Unit. Ej: variableAuxiliar = y+1 es de tipo Unit, variableAuxiliar=2+1 es de tipo Unit.
+Si nosotros queremos retornar esa variable tenemos que ponerla en la ultima linea solo con su nombre. Ej: variableAuxiliar
+
+
+
+Poner funciones en el programa (ESTO NO APLICA AL CURSO): Dentro del object puedo definir las funciones que quiera pero lo que se ejecuta es una función llamada main, esto es parecido a C, donde podemos definir funciones pero lo que se ejecuta es lo que está dentro de la función main en la cual podemos usar las funciones que definimos fuera.
+La función main es de la forma 
+def main(args: Array[String]): Unit = {
+  //código
+}
+
+También en la última versión de Scala (Scala 3) se puede hacer la función main de la siguiente forma
+@main def main(): Unit = {
+  //código
+}
+
+
+
+Escribir un programa en Scala (ESTO NO APLICA AL CURSO): Todo el programa debe estar escrito dentro de un Object de la forma object nombreObjeto { //Programa}.
+
+Un object en Scala es un contendor que agrupa todo el código y existe solo uno en todo el programa, por convención el nombre que le ponemos (nombreObjeto) es el mismo nombre del archivo.
+
+Si queremos usar una función pero en otro archivo de mi proyecto, la podemos llamar usando nombreObjeto.nombreFuncion(parámetros).
+Ej: object archivo1 {
+	def sumar(..)
+}
+En archivo2 puedo usar archivo1.sumar(...).
+
+
+
+NO APLICA AL CURSO: Esa etiqueta la puse porque en el curso nos pasan plantillas sobre las cual trabajar.
+
+
+
+println(): Imprime un String y agrega un salto de línea al final (deja el cursor en la línea de abajo), es el símil del print() de Python y del printf() de C, pero el printf() no hace un salto de línea al final (Tenemos que ponerlo nosotros).
+
+Para poner variables dentro del println y que se imprima su valor, tenemos dos formas
+*println(mensaje donde las variables se ponen como $variable") 
+Ej: println(s"Las variables son $variable1 y $variable2")
+*Si la variable que vamos a mostrar es un número y queremos controlar cómo se muestra (cuántos decimales, cuánto espacio, si se rellena con 0, etc.) Tenemos que usar println(f"mensaje donde las variables se ponen como $variable%formato"). Donde el formato se lo damos con un especificador de formato (los mismo que en C). 
+Ej: Sea val precio = 19.5, println(f"El precio es $precio%.2f euros")
+imprime "El precio es 19.50 euros".
+
+Si ponemos caracteres de escape como \n y \t y queremos que el println() lo lea como strings hay que usar println(raw"mensaje con carácter de escape")
+
+
+
+Variables de tipo String: Si queremos crear una variable de tipo String, puedo usar la misma lógica que usamos dentro del println().
+Ej: val mensaje = s"Con tu nota $nota REPROBASTE"
+
+
+
+Ejecutar el código en Intellij: CTRL + SHIFT IZQ + F10
+
+
+
+Secuencias de escape en Scala: Son caracteres que empiezan con \ y tienen ciertas funciones especiales dentro de un texto (String) o un carácter (char). Las secuencias de escape más comunes son:
+*\n (salto de línea)
+*\t (hace el efecto de haber apretado el Tab)
+*\r (devuelve el cursor al inicio de la línea en la que se está escribiendo)
+*\b (devuelve el cursor a la posición anterior a donde está el cursor)
+*\" o \' o \\  (permite imprimir " o ' o \)
+Son lo mismo que C, para ver su uso ir a los archivos de C.
+
+
+
+Importar librerías en Scala: Antes del object se importan las librerías de la forma 
+*import paquete.NombreDelElemento -> Importa solo un elemento 
+*import paquete._  -> Importa todo el paquete
+
+
+
+if, else if, if: Hay dos formas de usarlos, la forma antigua es lo mismo que en C y la forma nueva es distinta pero solo lo acepta Scala 3.
+
+*Forma antigua es de la forma 
+if (condición) {
+    // código si es verdadero
+} else if (otra_condición) {
+    // código si la otra es verdadera
+} else {
+    // código si ninguna es verdadera
+}
+
+*Forma nueva es la forma
+if condición then
+  // código si es verdadero
+else if otra_condicion then
+  // código si la otra es verdadera
+else
+  // código si ninguna es verdadera
+
+A diferencia de C, en Scala existe el tipo Booleano por ende la condición no se considera True cuando hay un número distinto de 0, como si pasa en C.
+También, a diferencia de C, en Scala lo que devuelve el if. else if, else es una expresión, así que siempre tiene un valor (el de la última línea que se ejecuta), así que se puede meter este valor en una variable.
+
+Si cada rama (if, else if, else) devuelve un tipo distinto, al guardar todo en una variable, esta inferirá su tipo siguiendo "Jerarquía de tipos". 
+Ej: val y = if (x > 0) 1 else "texto", la variable y es de tipo Any.
+
+
+
+Confusión con el if, else if, else dentro de una función: Al caer en el if, else if, else se ejecuta el código de ese caso pero no termina la función, a menos que dentro de ese caso haya un return.
+
+
+
+Hacer que el usuario ingrese algo al programa: Necesitamos hacer import scala.io.StdIn para poder usar StdIn.
+El StdIn tiene varios métodos según el tipo de dato que queremos que ingrese el usuario
+*StdIn.readLine() -> lee una línea de texto (String)
+*StdIn.readInt() -> lee un número entero
+*StdIn.readDouble() -> lee un número decimal
+*StdIn.readBoolean() -> lee true o false
+*StdIn.readChar() -> lee un solo carácter
+
+La forma de usar el StdIn es guardar en una variable inmutable (val) cuyo valor es el método que elegimos, así val nombreVariable = metodoStdIn. 
+Ej: val edad = StdIn.readInt()
+
+
+
+While en Scala: Se usa igual que en C, de la siguiente forma
+while (condición) {
+    // código a ejecutar
+}
+La letra que usemos para la condición (o variable) debe ser de tipo mutable (var) porque en cada iteración va a ir cambiando su valor. 
+Ej: var i = 0 y luego usar un while (i < 5)
+
+
+
+do while en Scala: Igual que en C. Se usa la siguiente forma
+do {
+    // código a ejecutar
+} while (condición);
+
+
+
+for en Scala: En Python usábamos el for con un range, acá es similar pero no usamos range() sino que nosotros podemos usar until o to, by para hacer el "range", de la siguiente forma
+for (i <- inicioIteración until/to finIteración by paso) {
+    // código a ejecutar
+}
+
+Donde si usamos until se itera sin incluir finIteración y si usamos to se itera incluyendo finIteración.
+*En Python hacemos un for i in lista -> En C (n es el largo de la lista) se hace for (int i=0; i<n; i++){ //código a ejecutar}
+
+A diferencia de C, en Scala sí podemos iterar un for directamente sobre una lista. Ej: for (x <- List(1,2,3)).
+
+También en Scala 3 podemos usar for de la siguiente forma
+for (i <- inicioIteración until/to finIteración by paso) do
+    // código a ejecutar
+
+Hay mas cosas que se pueden poner dentro del for pero las veremos más adelante.
+
+
+
+While vs For: Usamos while cuando no sabemos cuantas iteraciones van a ser, y usamos for cuando si sabemos cuantas iteraciones van a ser.
+
+
+
+Expresiones y sentencias en general: Entre for, while, do while, if, else if, else. Hay algunas cosas que son expresiones, es decir, devuelven un valor, por ende se pueden guardar en una variable. 
+Mientras que hay otros que son sentencias, es decir, realizan una acción (no devuelven un valor), por ende no se pueden guardar en una variable.
+
+En Scala, todas las nombradas son expresiones pero el while y do while siempre retornan un valor de tipo Unit, por lo cual nunca es útil para guardar en una variable, por eso el for, if, else if, else si se suelen guardar en variables.
+
+En Python al poner un return dentro de una sentencia, si se esta devolviendo un valor pero eso lo hace la función no la sentencia. 
+Ej: Un return dentro de un for, se retorna un valor pero ese valor es retornado por la función, no por el for, pues este es una sentencia.
+
+
+
+Match: Funciona igual que el switch de C pero en Scala el match es una expresión que devuelve un valor útil que podemos guardar en una variable. La forma de usar match es
+variable match { 
+case valor1 => // código si variable == valor1
+case valor2 => // código si variable == valor2
+case_ => // código si no coincide con ningún caso     
+}
+
+Usando | (o) podemos agrupar varios casos en solo un case, usando case valor1|valor2, se entra a ese case si se tiene valor 1 o valor 2.
+
+También podemos usar if dentro de un case para darle una condición para caer en ese caso (a parte del valor), la forma es case valor if (condición) => //código si variable==valor y se cumple la condición.
+
+
+
+Programación estructurada: Es una forma de programar donde se siguen las siguientes tres cosas
+*Secuencia -> Las instrucciones se ejecutan una tras otra
+*Selección -> Se usan condicionales que seleccionan qué camino seguir
+*Iteración -> Se usan ciclos que repiten pasos
+Además, se usa la descomposición procedural, que es dividir el programa en funciones.
+Un hecho que no responde la programación estructurada es cómo repartir responsabilidades entre las distintas partes del programa (esto lo hace la POO).
+
+
+
+Cohesión: Se refiere a qué tan relacionadas están entre sí las tareas dentro de un mismo módulo, clase o función.
+Tener alta cohesión significa que el módulo, clase o función hace tareas cercanas y claras.
+Tener baja cohesión significa que el módulo, clase o función mezcla tareas de distintos niveles. 
+Ej: En el PPT, la función displayShape debe conocer las variantes de figuras, interpretar su representación, seleccionar que operación ejecutar.
+En nuestro programa queremos alta cohesión.
+
+
+
+Acoplamiento: Se refiere a qué tan dependiente es un módulo, clase o función de otros módulos, clases o funciones para funcionar.
+Tener alto acoplamiento significa que un módulo, clase o función depende de detalles internos de otros módulos, clases o funciones, hacer un cambio en alguna cosa obliga a hacer cambios en el resto.
+Tener bajo acoplamiento significa que un cambio en alguna cosa no obliga a hacer cambios en el resto.
+En nuestro programa queremos bajo acoplamiento.
+
+
+
+Cliente: En programación el cliente es el código que usa o llama a otro código.
+Ej: Si tenemos una clase Figura con un método displayOn, el cliente de esa clase es cualquier parte del programa donde se usa.
+
+
+
+Objeto: Hay tres formas de ver a un objeto. Ej: Un cuadrado
+*Perspectiva conceptual -> ¿Qué hace el objeto?, ¿Qué es el objeto en el contexto de mi programa?
+Ej: Sabe mostrarse en pantalla (tiene el código para dibujarse a sí mismo, sin que otra parte del programa tenga que hacerlo por él), es una figura geométrica, representa algo que tiene forma y posición.
+
+*Perspectiva de especificación -> ¿Qué cosas le pueden pedir al objeto?
+Ej: Le pueden pedir que se muestre en una pantalla dada, def displayOn(screen: Screen): Unit
+
+*Perspectiva de implementación -> ¿Cómo hace lo que le piden?
+Ej:
+class Square(lado: Double, x: Double, y: Double) extends Figura:
+  def displayOn(screen: Screen): Unit =
+    screen.drawLine(x, y, x + lado, y)
+    screen.drawLine(x + lado, y, x + lado, y + lado)
+    screen.drawLine(x + lado, y + lado, x, y + lado)
+    screen.drawLine(x, y + lado, x, y)
+
+
+
+Descomponer un problema en objetos: Cuando tenemos un problema y lo queremos resolver con POO, hay que dividir el problema en varios objetos, cada uno con su propia responsabilidad (su propio rol, lo que debe hacer el objeto).
+
+
+Para identificar los objetos es bueno leer el problema y reconocer a los sustantivos, estos pueden indicar los objetos que necesitaremos. 
+Ej: "Un cliente hace un pedido, que contiene varios productos." -> Los objetos pueden ser Cliente, Pedido, Producto.
+
+Para identificar la responsabilidad (el rol, lo que debe hacer el objeto) es bueno leer el problema y reconocer a los verbos, estos pueden indicar responsabilidades.
+Ej: "Un cliente hace un pedido, que contiene varios productos." -> "hace un pedido" puede ser una responsabilidad del objeto Cliente, "contiene varios productos" puede ser una responsabilidad del objeto Pedido.
+
+Además, luego de lo anterior hay que pensar en tener bajo acoplamiento, alta cohesión y cambios esperables, de esta forma puede que quitemos objetos o responsabilidades y así obtengamos nuestra versión final.
+
+
+
+Interfaz de un objeto: Es el conjunto de operaciones (métodos) que ese objeto expone hacia afuera para que otras partes del código las usen.
+La forma es 
+trait nombreInterfaz:
+ def metodo1(parámetros): tipoRetorno
+ def metodo2(parámetros): tipoRetorno
+ ...
+
+Ej:
+trait Account:
+ def getBalance: Int
+ def withdraw(amount: Int): Boolean
+ def deposit(amount: Int): Boolean
+
+
+
+Definir un objeto: Se hace de la forma 
+object nombreObjeto extends nombreInterfaz:
+ //Código del estado del objeto (información que recuerda mientras existe)
+ //Código donde se definen los métodos de la interfaz 
+
+Ej:
+object AccountOfBigby extends Account:	//La interfaz es Account
+
+//Estado: Campos
+var balance: Int = 50_000
+val currency: String = "CLP"
+
+//Comportamiento: Métodos
+def getBalance: Int = balance
+def withdraw(amount: Int): Boolean =
+if balance >= amount then
+balance -= amount
+true
+else false
+def deposit(amount: Int): Boolean =
+balance += amount
+true
+
+
+
+¿Qué pasa si a una variable le doy como valor un objeto?: Supongamos que tenemos el objeto nombreObjeto que tiene un extends nombreInterfaz, si yo hago val x=nombreObjeto, ¿de qué tipo es x?.
+
+Por la inferencia de tipos de Scala, Scala entiende que x es de tipo nombreObjeto y también es de tipo nombreInterfaz (pues el objeto hace extends a una interfaz).
+
+Una buena práctica es definir la variable declarando que su tipo es nombreInterfaz ¿por qué? porque así Scala no infiere que la variable es de los dos tipos (nombreObjeto y nombreInterfaz) ¿por qué no nos gusta eso? porque si la variable es de tipo nombreObjeto podríamos usar métodos que quizás están en el objeto pero no en la interfaz, y si después cambiamos el objeto también estaremos cambiando la variable, en cambio si la variable es de tipo nombreInterfaz que es el tipo más general, no tendremos ese problema (a menos que cambiemos la interfaz, lo cual es raro).
+
+Ej:
+val account = AccountOfBigby 	//Scala infiere que account es de tipo AccountOfBigby y es de tipo Account
+
+val account: Account = AccountOfBigby	//Scala entiende que account es de tipo Account (forma buena)
+
+Si se define un objeto sin usar extends a una interfaz, entonces la interfaz de ese objeto es la que se forma con los métodos que están definidos dentro de la def del objeto.
+
+
+
+Clase: Es una plantilla para crear objetos que comparten características (así no tenemos que definir cada objeto por separado). Una clase puede o no tener extends nombreInterfaz.
+
+Con interfaz la forma es 
+class nombreClase(parámetros) extends nombreInteraz:
+  //Código
+Dentro del código deben estar definidos los métodos de la interfaz
+
+Sin interfaz la forma es
+class nombreClase(parámetros):
+  //Código
+Dentro del código deben estar definidos los métodos 
+
+A diferencia de Python y JavaScript, en Scala las clases no tienen una función __init__ o constructor, sino que los parámetros ya se consideran el constructor en sí.
+
+
+
+Instanciar un objeto de una clase: Para crear un objeto a partir de una clase, es de la forma 
+val nombreObjeto = new nombreClase(parámetros).
+En Scala 3 se puede hacer sin el new.
+
+Para usar un método sobre ese objeto es de la forma nombreObjeto.metodo(parámetros).
+
+A diferencia de en las funciones, en los parámetros de una clase si hay que indicar var o val para cada parámetro. 
+Ej: class SimpleAccount(var balance: Int, var currency: String)
+
+
+
+Letras de color rojo en Intellij: Indican errores, al pasarle el clic por encima sale que está fallando.
+
+
+
+Testing: Es una forma de verificar el software, lo hace ejecutando casos concretos y comparando el comportamiento observado con el esperado.
+Hacer un buen testing es difícil pues
+*Hacer todas las pruebas posibles es inviable.
+*Hacer pruebas ad hoc (nosotros hacemos pruebas al azar, pura intuición) puede ayudarnos a encontrar errores pero no sabemos si nos faltan pruebas.
+*Hacer pruebas con generación automática (programas que hacen muchas pruebas siguiendo instrucciones) puede funcionar pero hay que saber bien qué instrucciones dar
+Cuando hablamos de "prueba" nos referimos a una entrada.
+
+
+
+TDD: Es una metodología que usaremos para desarrollar software.
+Normalmente escribimos el programa, luego hacemos test, y luego corregimos.
+Si usamos la metodología TDD vamos a hacer 3 cosas en ciclo
+*RED -> Escribimos un test que expresa un comportamiento que queremos que tenga el programa 
+*GREEN -> Escribimos el mínimo código que pasa el test
+*REFACTOR -> Mejoramos el diseño del código (si rompemos algo, el test nos avisará altiro y lo podremos corregir)
+Así, hacemos RED -> GREEN -> REFACTOR, luego repetimos el ciclo para expresar otro comportamiento del programa y así el programa se va construyendo incrementalmente.
+
+Esto es raro porque estamos haciendo test primero y luego escribiendo código, esto produce que al inicio el test falla si o si, pero nos permite construir el código asegurándonos de que en cada paso el test no está fallando.
+
+
+
+TDD con bugs: Cuando encontramos un bug en el programa lo que hacemos es ir directo al código, buscar lo que está mal, y arreglarlo.
+Pero lo mejor es usar TDD, donde tenemos que hacer 3 cosas
+1)Escribir un test que reproduzca ese bug. Ej: El test llama a la función con los datos exactos que causan el error, y que diga cuál debería ser el resultado correcto.
+2)Corregir el código hasta que pase el test.
+3)Dejar el test por si en un futuro vuelve a pasar ese bug.
+
+
+
+Dónde se ponen los test en Intellij: src -> test -> scala -> clic derecho en scala -> new -> scala class, ahí ponemos el código de los test.
+¿Cómo el archivo de los test acceden al archivo del programa? En el archivo de test hay que importar las clases/funciones del archivo del programa, igual que importar cualquier librería. 
+
+
+
+Cómo saber que entradas usamos en los tests: Hay que usar las técnicas de particionado, casos límite, y límites lógicos.
+*Particionado -> Dividir el espacio de las entradas posibles en subdominios donde la función se comporta de forma similar dentro de cada subdominio. Ej: Una función que devuelve valor absoluto abs() tiene sentido que las entradas que probemos sean los n<0, n>0, n=0 (ahí tenemos 3 subdominios) 
+*Casos limites -> Los errores tienden a concentrarse en los bordes de las particiones, así que hay que evaluar en esos bordes. Ej: Probamos las entradas n=-1, n=1, n=0.
+*Límites lógicos -> Hay que probar los límites técnicos del tipo de dato que estamos usando (para ver si hay overflow). Ej: Como la función abs recibe un int, probamos los casos para n=Int.MinValue, n=Int.MaxValue.
+
+
+
+Librerías: Es un cjto. de código que resuelve tareas específicas y que podemos usar cuando lo necesitemos sin tener que programar cada funcionalidad desde cero. El código llama a la librería cuando lo necesita.
+
+
+
+Framework: Es un cjto. de herramientas, reglas y código pre-escrito que da una estructura para construir una aplicación, en vez de programar todo desde cero. El framework llama al código dentro de su estructura.
+
+
+
+xUnit: Es un patrón de diseño que comparten muchos frameworks de testing unitario en distintos lenguajes de programación. En la x se puede poner un lenguaje, JUnit, NUnit, Munit (Scala), ..., todos esos son frameworks de testing basados en xUnit.
+
+Los frameworks nombrados ejecutan los test y llaman al código para hacer las pruebas.
+
+Lo bueno es que cada uno de los nombrados tiene su sintaxis propia pero comparten las ideas básicas, así aprender uno facilitará aprender otro.
+
+
+Ideas básicas de cualquier xUnit:
+*Test Case -> Es un único test que verifica una cosa especifica. 
+Ej: Un test que verifica que abs(-5) devuelve 5
+
+*Test Oracle -> Es el criterio o mecanismo que permite decidir si lo que estamos viendo está mal o bien (un oráculo), el oráculo hace la comparación sobre si el valor obtenido en un test case coincide con el valor esperado, y marca el test case como fallido si no coincide.
+
+*Test Suite -> Es un conjunto de test case relacionados. 
+Ej: Podemos tener un suite llamado "Tests de la función abs" donde se agrupan todos los test que usan los casos particionados, casos limites y límites lógicos de la función abs.
+
+*Test fixture -> Es el entorno que necesita un test para funcionar de forma consistente y repetible. 
+Ej: Si un test es sobre una función que opera en una base de datos, el fixture podría ser crear una base de datos vacía e insertar ciertos datos iniciales para hacer el test, y al final borrar los datos. La idea es que cada test empiece desde el mismo punto de partida, sin importar los test que corrieron antes.
+
+*Test runner -> Es la herramienta que ejecuta todos los tests automáticamente y muestra los resultados (cuántos pasaron, cuántos fallaron, y por qué).
+
+
+
+Anotaciones: Son marcas en el código que agregan metadatos a elementos del programa, afectando cómo lo procesa el framework. 
+Ej: En JUnit (Java) algunas anotaciones son @Test, @BeforeEach, @AfterEach.
+
+
+
+JUnit: Es un framework para programas en Java que tiene
+*Anotaciones para marcar métodos como tests, es decir, es una forma de decirle al framework que ese método es un test.
+En la línea de código antes de definir el método se pone @Test
+
+*Anotaciones para marcar métodos como preparación/limpieza, es decir, es una forma de decirle al framework que ese método es para preparar el test fixture u ese método es para limpiar el test fixture.
+Para la preparación, en la línea de código antes de definir el método se pone @BeforeEach 
+Para la limpieza, en la línea de código antes de definir el método se pone @AfterEach
+
+*Aserciones para validar el resultado esperado, es decir, es el Test Oracle que compara lo que se obtuvo del test con lo que esperábamos obtener.
+La aserción debe ir dentro del método que esta anotado como test, se usa assert(). Podemos usar assert de distintas formas: assertEquals(x, y) verifica que x e y sean iguales, assert(condición) verifica que la condición sea verdadera, assertNotEquals(x, y) verifica que x e y no sean iguales.
+
+*Herramientas para ejecutar los tests, es decir, el test runner (lo podemos hacer desde Intellij o desde la terminal)
+En Intellij le damos play a la flecha a la izquierda de cada test.
+En la terminal ponemos sbt test.
+
+Ya reconocimos casi todas las ideas básicas de cualquier xUnit, pero falta el Test Suite, la forma de trabajar es hacer una clase que representa a un Test Suite, y dentro de esa clase ponemos los métodos anotados como test (y dentro las aserciones) y los métodos anotados como preparación/limpieza.
+
+El ejemplo de uso de todo lo anterior está en Intellij.
+
+
+
+Anotación @DisplayName en JUnit: Es una anotación que sirve para cambiar el nombre del método en los reportes y así ser más claro. Se pone en la línea de código antes de definir el método y después de poner @Test, y es de la forma @DisplayName("nombre").
+
+
+
+MUnit: Es una biblioteca de Scala que extiende JUnit, usa muchas de sus características pero con una sintaxis distinta. En MUnit no usamos anotaciones.
+*Para definir un test es de la forma
+test("nombre"):
+ //Código del test con el assert
+
+*Para definir un BeforeEach
+override def beforeEach(context: BeforeEach): Unit =
+ //Código del método de preparación
+
+*Para definir un AfterEach
+override def afterEach(context: AfterEach): Unit = 
+ //Código del método
+
+En la clase que representa al Test Suite hay que poner extends munit.FunSuite:, de esta forma se tomarán las cosas de JUnit y las podremos usar.
+
+Para que funcione Munit, hay que borrar todo lo del build.sbt y poner lo siguiente 
+scalaVersion := "3.8.4"
+
+lazy val root = rootProject
+  .settings(
+    name := "Scala_apuntes",
+    libraryDependencies ++= Seq(
+      "org.scalameta" %% "munit" % "1.2.2" % Test
+    ),
+    testFrameworks += new TestFramework("munit.Framework")
+  )
+
+REVISAR LO ANTERIOR
+
+toString: Cuando corremos los test, los objetos se muestran como Clase@Dirección, pero eso es inentendible. 
+Ej: Money@19bb07ed.
+
+Para arreglar eso hay que ir a la clase del objeto y poner la siguiente función
+override def toString: String =
+ s"nombreClase($parametro1, $parametro2, ...)"
+
+
+
+Problemas con el equals y cómo arreglarlo: equals compara que las dos cosas apunten al mismo objeto en memoria (como hacer == con punteros).
+En el ejercicioDivisasTest hice assertEquals(_12clp, new Money(12, "CLP")), lo cual da test fallido pues ambas cosas son objetos que están guardados en lugares distintos de la memoria (a pesar de que tienen los mismos datos).
+
+Para arreglar eso, hay que ir a la clase del objeto y poner la siguiente función
+override def equals(obj: Any): Boolean =
+  if obj.isInstanceOf[nombreClase] then
+    val other = obj.asInstanceOf[nombreClase]
+    parametro1 == other.parametro1 && parametro2 == other.parametro2 && ... 
+  else false
+
+Llamamos a equals igual que antes.
+
+
+
+Map:
+
+
+
+Ejemplo de mala definición de una clase: Creamos la clase ColorPoint que es la plantilla para puntos de un color, si lo hacemos de la siguiente forma
+import java.awt.Color	//Import para traer la clase Color desde Java
+class ColorPoint(
+   var x: Double,
+   var y: Double
+):
+   var color: Option[Color] = None
+   def setColor(c: Color): Unit =
+      color = Some(c)	//Some(c) significa "Si c es un valor, úsalo"
+
+Es una mala definición, pues si instanciamos un objeto de esa clase, si nos olvidamos de usar el método setColor, el objeto queda sin color, lo cual es vital por su propia def (es un punto de color).
+
+La forma correcta de definir esa clase es obligar a que como parámetro se reciba el color.
+import java.awt.Color
+class ColorPoint(
+    var x: Double,
+    var y: Double,
+    var color: Color
+)
+
+
+
+Constructores secundarios en Scala: Ya sabemos que en Scala las clases no tienen una función __init__ o constructor, sino que los parámetros ya son el constructor en sí, a esto lo llamamos constructor primario.
+Los constructores secundarios (también llamados constructores auxiliares) sirven para tener otras formas de instanciar un objeto de esa clase (en vez de usar el constructor primario usando val nombreObjeto = new nombreClase(parámetros)). Su utilidad es que hayan formas más simples de instanciar el objeto.
+Ej: Un constructor auxiliar que permita que el usuario omita algunos parámetros
+
+La forma de definir constructores secundarios, es que dentro de la clase definimos los métodos this, cada método this es un constructor secundario, la forma es
+def this(parámetros del constructor secundario) =
+  this(argumentos para otro constructor)
+
+Donde la parte de "argumentos para otro constructor" es muy importante pues todo constructor secundario debe terminar delegando, directa o indirectamente, en el constructor primario. 
+¿Cómo hacemos esto?
+Dentro del this() vamos a poner una cantidad de argumentos, según esa cantidad, podremos decir que ese constructor secundario delega esos argumentos a otro constructor que tiene esa cantidad de parámetros.
+
+Ej: Si el constructor primario tiene 3 parámetros y definimos un constructor auxiliar con this(a,b,0) (3 argumentos), entonces ese constructor secundario está delegando en el constructor primario.
+
+Otro Ej, pero ahora en código:
+class Ejemplo(val a: Int, val b: Int, val c: Int):
+
+  def this(a: Int, b: Int) =	
+    this(a, b, 0)           //3 argumentos, delega al constructor primario
+
+  def this(a: Int) =
+    this(a, 0)              //2 argumentos, delega al constructor que tiene 2 parámetros (el constructor secundario de arriba), delega indirectamente al constructor primario
+
+Para instanciar al objeto de una clase usando un constructor secundario, es lo mismo que con el constructor primario solo que ahora ponemos la cantidad de parámetros que recibe ese constructor secundario y respetando los tipos de cada parámetro de ese constructor secundario, Scala busca a este constructor e instancia al objeto.
+Ej: 
+val hola = new Ejemplo(1, 2)  //Scala usa el constructor que tiene 2 parámetros donde cada parámetro es un Int
+val hola2 = new Ejemplo(1)      //Scala usa el constructor que tiene 1 parámetro donde el parámetro es un Int
+
+Nótese que se pude hacer hola2.c, pues al hacer new Ejemplo(1) se llama al constructor secundario 2 (pasando a=1), luego este llama al constructor secundario 1 (pasando a=1 y b=0), y luego este llama al constructor primario (pasando a=1, b=0, c=0). 
+Así, el objeto hola2 sigue teniendo valores en los parámetros b y c (los que están definidos en esos constructores) a pesar de que no se los dimos al crearlo y a pesar de que el constructor inicial que usamos no los tenga (no tiene el c).
+
+
+
+Parámetros por defecto: Es una forma alternativa a los constructores secundarios. En vez de usar constructores secundarios, damos valores a los parámetros de la clase (del constructor primario).
+Ej: class Socket(val timeout: Int = 5000, val linger: Int = 5000)
+
+Para instanciar un objeto de esa clase, tenemos varias formas
+*Sin poner parámetros
+Ej: val s1 = Socket() 	//Se asume que timeout = 5000 y linger = 5000
+
+*Dar solo el valor (acá si importa el orden de lo que pongamos)
+Ej: val s2 = Socket(1000)	//Se usa timeout = 1000 y linger = 5000
+    val s3 = Socket(1000,2000)   //Se usa timeout = 1000 y linger = 2000
+
+*Dar el parámetro con su respectivo valor (acá no importa el orden de lo que pongamos)
+Ej: val s4 = Socket(linger = 3000) 	//Se usa timeout = 5000 y linger = 3000
+    val s5 = Socket(linger = 3000, timeout = 1000)	//Se usa timeout = 1000 y linger = 300
+
+
+
+Otras cosas dentro de una clase: Ya sabemos que dentro de una clase podemos definir constructores secundarios y métodos, lo que hay que saber es que también podemos poner líneas de código que no sean nada de lo anterior, estas líneas se ejecutan cada vez que se instancia un objeto de esa clase.
+Ej:
+Class Person(val firstName: String, val lastName: String):
+ println("Initialization begins.")	//Línea que se ejecuta cada vez que hay una instancia
+ val fullName = s"$firstName $lastName"	//Línea que se ejecuta cada vez que hay una instancia
+ def printFullName(): Unit = println(fullName)	//Método
+ println("Initialization ends.")	//Línea que se ejecuta cada vez que hay una instancia
+
+
+
+Interfaz de una clase: Ya vimos los trait sobre objetos, para clases funcionan igual, pero ahora un trait contiene cosas que debe tener la clase que tenga el extends a ese trait.
+Estas cosas pueden ser métodos, variables, etc.
+La forma es 
+trait nombreInterfaz:
+ //variables sin inicializar
+ def metodo1(parámetros): tipoRetorno
+ def metodo2(parámetros): tipoRetorno
+ ...
+
+Ej: 
+trait Legged:
+  val numLegs: Int 
+  def walk(): Unit 
+
+
+
+Usar una clase con interfaz: Al momento de definir la clase lo hacemos de la forma 
+class nombreClase(parámetros) extends nombreInteraz:
+  //Código
+
+Dentro del código deben estar definidos los métodos de la interfaz y las variables de la interfaz, ambas cosas definiciones deben iniciar con override.
+Ej:
+class AkitaInu(name: String) extends Legged:
+   override val numLegs: Int = 4
+   override def walk(): Unit =
+      println(s"$name is walking on its $numLegs legs.")
+
+También se puede usar más de un trait, donde separamos cada trait con comas, de la forma 
+class nombreClase(parámetros) extends nombreInteraz1, nombreInterfaz2, ... .
+Ej: class AkitaInu(name: String) extends Legged, Tailed:
+	//código
+
+
+
+Un trait que usa otro trait: Un trait puede extender otros traits, se hace de la forma 
+trait nombreInterfaz extends nombreInteraz1, nombreInterfaz2, ... .
+Ej: 
+trait Camera:
+   def takePhoto(): Unit
+
+trait Phone:
+   def makeCall(number: String): Unit
+
+//A Smartphone extends both capabilities
+trait Smartphone extends Camera, Phone
+
+
+
+Recordatorio de usar trait como tipo: En "¿Qué pasa si a una variable le doy como valor un objeto?" vimos que si guardamos un objeto en una variable es mejor definir explícitamente que su tipo es nombreInterfaz.
+
+Acá es lo mismo, si guardamos un objeto instanciado de una clase en una variable es mejor definir explícitamente que su tipo es nombreInterfaz de la interfaz que está en extends de la clase donde se instancio el objeto.
+EJ: val d2: Legged = new AkitaInu("Yozo") //Definimos explícitamente que su tipo es Legged
+
+
+
+Subtipado: Si B es subtipo de A, entonces en cualquier lugar (funciones, clases, etc.) donde se espera un A, puedo pasar un B sin que nada se rompa.
+Esto es una definición, no dice cómo cada lenguaje decide si B es subtipo de A.
+
+¿Cómo decide el lenguaje si B es subtipo de A?
+Hay dos formas, subtipado estructural y subtipado nominal.
+
+
+
+Subtipado estructural: En un lenguaje de tipado dinámico (como Python), no existe una jerarquía declarada.
+Es una forma de determinar si B puede usarse donde se espera A, B es un subtipo estructural de A si B tiene como mínimo todos los métodos que A tiene.
+
+
+
+Subtipado nominal: En un lenguaje de tipado estático (como Scala), si existe una jerarquía declarada.
+Es una forma de determinar si B puede usarse donde se espera A, B es un subtipo nominal de A si B se define con un extends a A.
+
+Ej donde no se usa el extends:
+class Duck {
+  def m1(): Unit = println("Duck m1")
+  def m2(): Int = 42
+  def m3(): String = "quack"
+}
+
+class Witch {
+  def m1(): Unit = println("Witch m1")
+  def m2(): Int = 99
+  def m3(): String = "cackle"
+}
+
+def foo(d: Duck): Unit = d.m1()
+
+foo(new Duck())   // ✅ compila
+foo(new Witch())  // ❌ error de compilación
+
+Nótese que a pesar de que Duck y Witch tienen los mismos métodos, la función espera Duck y le estamos dando Witch.
+
+
+Ej donde se usa el extends:
+trait Criatura {
+  def m1(): Unit
+  def m2(): Int
+  def m3(): String
+}
+
+class Duck(nombre: String, color: String) extends Criatura {
+  def m1(): Unit = println(s"$nombre (pato $color) dice: Duck m1")
+  def m2(): Int = 42
+  def m3(): String = "quack"
+}
+
+class Witch(nombre: String, poder: String) extends Criatura {
+  def m1(): Unit = println(s"$nombre (bruja de $poder) dice: Witch m1")
+  def m2(): Int = 99
+  def m3(): String = "cackle"
+}
+
+def foo(c: Criatura): Unit = c.m1()
+
+foo(new Duck("Donald", "amarillo"))   // ✅
+foo(new Witch("Maléfica", "fuego"))   // ✅ ambas siguen siendo subtipos de Criatura
+
+Nótese que ahora se definió el trait Criatura donde Duck y Witch son extensiones de ese trait, así la función espera Criatura y acepta Duck y Witch pues estas son subtipos de Criatura.
+
+En lo anterior se usó extends a un trait, pero el extends también puede ser a una clase (los traits no pueden tener parámetros de constructor)
+
+Ej donde se usa el extends a una clase:
+
+//Criatura ahora es una clase a con constructor
+abstract class Criatura(val nombre: String, val vidaMax: Int) {
+  def m1(): Unit
+  def m2(): Int
+  def m3(): String
+
+  def describir(): String = s"$nombre tiene $vidaMax puntos de vida"
+}
+
+//Duck extiende Criatura y debe llamar a su constructor con super(...)
+class Duck(nombre: String, vidaMax: Int, val color: String) 
+    extends Criatura(nombre, vidaMax) {
+  
+  def m1(): Unit = println(s"$nombre dice: Duck m1")
+  def m2(): Int = 42
+  def m3(): String = "quack"
+}
+
+class Witch(nombre: String, vidaMax: Int, val poder: String) 
+    extends Criatura(nombre, vidaMax) {
+  
+  def m1(): Unit = println(s"$nombre dice: Witch m1")
+  def m2(): Int = 99
+  def m3(): String = "cackle"
+}
+
+def foo(c: Criatura): Unit = {
+  println(c.describir())
+  c.m1()
+}
+
+val pato = new Duck("Donald", 50, "amarillo")
+val bruja = new Witch("Maléfica", 80, "fuego")
+
+foo(pato)
+foo(bruja)
+
+En el caso de extends a una clase, se tiene que si la clase B extiende la clase A, entonces 
+*B hereda toda la implementación de A
+*B es un subtipo nominal de A
+
+Además, se debe cumplir que 
+*Las clases que la usan como extends deben definir todos los métodos de dicha clase.
+*Las clases que la usan como extends deben tener los mismos parámetros de constructor que dicha clase.
+
+Lo anterior corresponde a la base del concepto de herencia, donde las clases que tienen extends las llamamos subclases y la clase que es el extends la llamamos superclase.
+
+
+
+Herencia en UML: iPad
+
+
+
+Cita de Cook: En POO nunca se debería preguntara a un objeto ¿qué eres por dentro? para decidir cómo tratar a un objeto, sino que se debe llamar a un método y el objeto mismo responde.
+Ej de algo que NO se debe hacer:
+def hacerSonido(x: Any): String = {
+  x match {
+    case d: Duck  => "quack"
+    case w: Witch => "cackle"
+  }
+}
+
+Ej de cómo sí se debe hacer:
+trait Criatura {
+  def hacerSonido(): String
+}
+
+class Duck extends Criatura {
+  def hacerSonido(): String = "quack"
+}
+
+class Witch extends Criatura {
+  def hacerSonido(): String = "cackle"
+}
+
+def presentar(c: Criatura): String = c.hacerSonido()
+
+
+
+Listas en Scala: En Scala las listas no vienen por defecto en el lenguaje, hay que crearlas (en Python si vienen por defecto), la idea es tener un trait (o más de uno) para definir el contrato de qué debe poder hacer una lista y luego usar clases para crear una lista extendiendo ese trait.
+Ej:
+trait SimpleList {
+  def get(index: Int): Option[Any]     // "toda lista debe poder hacer esto..."
+  def contains(value: Any): Boolean    // "...y esto..."
+  def indexOf(value: Any): Int         // "...y esto"
+  // pero NO dice cómo — no hay array, ni nodos, ni nada concreto aquí
+}
+
+class ArrayList extends SimpleList {
+  private var datos: Array[Any] = Array()
+  
+  def get(index: Int) = ...       // AQUÍ sí defines el "cómo": usando un array
+  def contains(value: Any) = ...
+  def indexOf(value: Any) = ...
+}
+
+
+
+Relaciones entre clases que no son herencias entre sí: Cuando hablamos de relaciones, hablamos de que hay una clase dueña de otra. Hay dos tipos de relaciones cuando no se usa extends (no se usa herencia)
+*Asociación (relación débil): Cuando se instancia un objeto de ambas clases, ambos objetos pueden vivir de forma independiente.
+*Composición (relación fuerte): Cuando se instancia un objeto de ambas clases, el objeto de la clase esclava no puede vivir sin el objeto de la clase dueña.
+
+La forma de identificar asociación o composición es preguntarse ¿El objeto de la clase esclava puede seguir existiendo/siendo usado por otra parte del código después de que el objeto de la clase dueña se destruya?
+Si sí, asociación.
+Si no, composición
+
+Ej:
+class Motor()
+
+class Auto {
+  private val motor = new Motor()
+}
+Si creo el objeto Auto, se crea el objeto Motor, y si se destruye el objeto Auto se destruye el objeto Motor pues este es private y no puede seguir siendo usado, composición
+
+
+Ej:
+class Profesor(val nombre: String)
+class Curso(val nombre: String, val profesor: Profesor)
+
+val prof = new Profesor("Ana")
+val curso = new Curso("Scala 101", prof)
+Si creo el objeto Curso, uso el objeto Profesor, y si se destruye el objeto Curso no se destruye el objeto Profesor y este puede seguir siendo usado, asociación
+
+
+Ej:
+class Auto {
+  val motor = new Motor()  // se crea adentro...
+}
+
+val auto = new Auto()
+val motorSuelto = auto.motor  // ...pero se expone
+Si creo el objeto Auto, se crea el Objeto motor, pero luego ese objeto motor se guarda en la variable motorSuelto, así si se destruye el objeto Auto no se destruye el objeto motor y este puede seguir siendo usado, asociación.
+
+¿Cómo identificar a la clase esclava y a la clase dueña?
+La clase esclava es la que es contenida/usada por la clase dueña.
+
+
+
+Asociación y Composición en UML: iPad.
+
+
+
+Clase abstracta: Es una clase incompleta, es decir, al menos uno de sus métodos no está definido (como en los traits) (el resto si puede estarlo). Se usan cuando queremos hacer lo mismo que un trait (métodos no definidos + herencia) pero necesitamos que reciba parámetros de constructor y/o que tenga métodos no definidos y definidos. Se usa igual que una class pero en vez de class se pone abstract class.
+
+Cumple las mismas reglas que un trait y una más,
+*Las clases que la usan como extends deben definir todos los métodos de dicha clase abstracta 
+*Las clases que la usan como extends deben tener los mismos parámetros de constructor que dicha clase abstracta
+
+Además, una clase abstracta no se puede instanciar (por estar incompleta) y no debe ser usada como tipo, similar a lo que vimos en "¿Qué pasa si a una variable le doy como valor un objeto?", por eso hay que usar como tipo el extends que tenga la def de esa clase.
+
+Ej:
+abstract class Figura(val color: String) {
+  def area(): Double
+}
+
+class Circulo(radio: Double, color: String) extends Figura(color) {
+  def area(): Double = math.Pi * radio * radio
+}
+
+En el ejemplo anterior, abstrac class no tiene ningún extends a un trait, entonces si creamos un objeto Circulo, Scala infiere que es de tipo Circulo y Figura, lo que no es buena práctica.
+En teoría queremos que sea del tipo del extends (lo que vimos en "¿Qué pasa si a una variable le doy como valor un objeto?") pero tampoco es buena idea porque el extends es hacia una clase abstracta, la buena práctica es definir un trait, donde la clase abstracta usa extends hacia ese trait, y nosotros al crear un objeto Circulo definimos que es del tipo de ese trait.
+
+Ej:
+trait Figura {              // el CONTRATO — esto es lo que usas como tipo
+  def area(): Double
+  def color: String
+}
+
+abstract class FiguraBase(val color: String) extends Figura {  // la IMPLEMENTACIÓN con constructor
+  // acá podrías poner lógica común futura si la necesitas
+}
+
+class Circulo(radio: Double, color: String) extends FiguraBase(color) {
+  def area(): Double = math.Pi * radio * radio
+}
+
+
+
+Métodos abstractos: Abstracto significa incompleto, así cualquier método que no está definido (los de los traits o clases abstractas) se les llama métodos abstractos.
+En UML, estos métodos se ponen en cursiva.
+
+
+
+Resumen de trait, clases abstractas, clases:
+trait: Solo un contrato que muestra lo que puede hacer un extends hacia ese trait, no instanciable
+clases abstractas: Comparten implementación común (código ya resuelto que las subclases heredan sin repetir) y dejan partes "por completar" (métodos aún sin implementación, que obligan a la subclase a resolverlos), no instanciable.
+clases: Implementación completa e instanciable.
+
+
+Cadena de herencia: Si tenemos muna cadena de herencia ¿Qué hay que implementar y qué no?, hay dos reglas
+*Hay que implementar todos los métodos de todos los trait/clases abstractas padres, incluso si no son directamente padres. Ej: T extends U, U extends V, entonces T también debe implementar los métodos de V
+*De lo anterior, si es que una clase padre ya implementó el método, entonces no es necesario volver a implementarlo. Ej: Si U ya implementó el método "hola" que nace en V, entonces T no tiene por qué implementar el método "hola"
+
+
+
+Metodología de trabajo: En iPad está la metodología correcta para ver cómo nacen las clases abstractas.
+
+
+
+CORRECIÓN de trait: Hasta el momento yo pensaba que dentro de un trait solo se pueden definir los métodos (cosas que debe hacer) que debe tener la clase que haga extends a ese trait, pero también existen los métodos sin parámetros que son básicamente datos que se ponen en el trait de la forma def nombreDato: tipoDato, estos se podrían poner directamente usando val o var, pero no es buena práctica.
+Ej:
+trait Personaje {
+  def nombre: String
+  def vida: Int
+}
+
+
+Al momento de definir una clase que hace extends a ese trait con métodos sin parámetros, debemos cumplir lo mismo que si fuera un método con parámetros, es decir, lo que dijimos en " Cadena de herencia", pero tiene tres formas de hacerlo
+
+*Como parámetro de constructor: Se usa cuando el dato cambia según la instancia
+Ej:
+class Caballero(val nombre: String, val vida: Int) extends Personaje
+
+*Con un override: Se usa cuando el dato se calcula dinámicamente cada vez que se consulta
+Ej:
+class Fantasma extends Personaje {
+  override def nombre: String = "Espíritu-" + java.util.UUID.randomUUID().toString.take(4)
+  override def vida: Int = 1
+}
+
+*Definiendo el dato como variable: Se usa cuando el dato siempre es el mismo para todas las instancias
+Ej:
+class Zombie extends Personaje {
+  val nombre: String = "Zombie sin nombre"
+  val vida: Int = 50
+}
+
+
+
+Extends implícito en una clase: Si al definir una clase no le ponemos ningún extends, igualmente clase tiene uno implícito, este es un extends AnyRef, el cual tiene los siguientes métodos
+*toString(): String
+*equals(that: Any): Boolean
+*hashCode(): Int
+
+
+
+Tipo estático: El tipo estático de una variable es literal lo que el compilador conoce, literal lo que está escrito en la definición de esa variable (o que el compilador infiere).
+Ej: 
+val x = 1 //El compilador infiere que 1 es Int, así que el tipo estático de x es Int
+val x: String = "1"	//El compilador lee que el "1" es String, así que el tipo estático de x es String
+val x: Animal = new Dog() //El tipo estático de x es Animal
+
+
+
+Tipo dinámico: Este solo aparece cuando la variable es un objeto instanciado de una clase, el tipo dinámico de esa variable es el nombre de la clase.
+Ej: val x: Animal = new Dog() //El tipo dinámico de x es Dog
+
+
+
+this: Dentro de una clase podemos usar this, donde el this significa "el objeto actual" (es el self de Python).
+this siempre se refiere al tipo dinámico.
+
+
+
+Firma de un método: La firma de un método la define el nombre del método, el número de parámetros, los tipos de los parámetros.
+
+
+
+Sobreescritura de métodos: Ocurre cuando definimos métodos usando override.
+
+
+
+Override: Cuando necesitamos definir un método que se hereda de una clase abstracta padre, una clase padre, o de un trait debemos usar override, este se pone antes del def. Donde el método que sobrescribimos con override debe tener la misma firma que el original.
+Ej:
+class Animal(val name: String):
+  def greet(a: Animal): Unit =
+    println(s"Good morning, ${a.name}")
+
+class Cat(name: String)
+  extends Animal(name):
+  override def greet(a: Animal): Unit =
+    println("Hello fellow cat")
+
+
+
+Sobrecarga de métodos: Ocurre cuando definimos métodos sin usar override, lo que se hace es definir los métodos con el mismo nombre pero con distintos parámetros (firma distinta).
+Ej:
+class Animal(val name: String):
+  def greet(a: Animal): Unit =
+  println(s"Good morning, ${a.name}")
+
+class Cat(name: String)
+  extends Animal(name):
+  def greet(a: Cat): Unit =
+  println("Hello fellow cat")
+
+
+
+En Sobreescritura o en Sobrecarga ¿Qué pasa si llamamos a un método?: Sea la forma variable.metodo
+1)El compilador ve el tipo estático de la variable y se fija en esa clase (ahí tiene sus métodos) y sus clases padres (pues de ahí puede heredar métodos).
+Luego, mira todos los métodos que tengan el nombre del método que queremos usar y vemos cual de esos métodos aceptan los argumentos que estamos pasando al método.
+Si ningún método calza -> Error de compilación
+Si algún método calza -> Compilará (pasamos a 2))
+
+2)Ya teniendo el método que calza, hay dos casos
+*Si ese método está con override en la clase del tipo dinámico del objeto, entonces usamos esa versión
+*Si ese método no está con override en la clase del tipo dinámico del objeto, entonces usamos esa misma versión.
+
+Ej:
+class Document(protected val title: String):
+   private val code: Int = title.length
+
+   override def toString(): String = "document"
+   
+   def describe(): String =
+     s"${this.toString()}: $title"
+   
+   def export(format: String): String =
+     s"$format:$title"
+
+class Report(reportTitle: String) extends Document(reportTitle):
+ override def toString(): String = "report"
+
+ override def describe(): String =
+ "Report>" + super.describe()
+
+   def export(copies: Int): String =
+     s"$copies copies"
+ 
+   def internalLabel: String = title
+
+val document: Document = new Report("Status")
+val report: Report = new Report("Budget")
+
+Al hacer document.describe(), el compilador ve que document es de tipo estático Document, así que mira esa clase y sus clases padres.
+Luego, ahí los métodos que tienen el nombre describe es solo uno y este acepta como argumento () y le estamos pasando (), así que compilará.
+
+Luego, ese método está con override en la clase del tipo dinámico del objeto, entonces usamos esa versión.
+
+El resultado es "Report> report: Status", donde super.describe() llama al describe() que está en class Document que retorna " report: Status".
+
+
+
+super: Cuando usamos override en un método, reemplazamos por completo la versión original, pero el super permite traer de vuelta lo que retorna la versión original (la ejecutará y devuelve lo que sea que esa ejecución retorne).
+super se refiere a la clase padre (no ve tipo estático o dinámico).
+Ej:
+class Animal {
+  def sonido(): String = "..."
+}
+
+class Dog extends Animal {
+  override def sonido(): String = {
+    "Guau, y también: " + super.sonido()
+  }
+}
+
+val perro: Animal = new Dog()
+
+Al hacer perro.sonido(), el compilador ve que perro es de tipo estático Animal, así que mira esa clase y sus clases padres.
+Luego, ahí los métodos que tienen el nombre sonido son dos, el de class Animal y class Dog, ambos aceptan como argumento () y le estamos pasando (), así que compilará.
+
+Luego, el método de class Dog está con override (ese método está con override en la clase del tipo dinámico del objeto), entonces usamos esa versión.
+
+El resultado es "Guau, y también: ..." pues super.sonido() llama al método sonido de class Animal que retorna "...". 
+
+
+
+Miembros de una clase: Son todas las clases que se definen dentro de una clase.
+*Parámetros
+*Métodos
+*Clases anidadas
+
+
+
+Encapsulamiento: Es la idea de que un objeto instanciado de una clase guarda sus datos internos (tiene un estado) y decide quién puede tocarlos (quien puede cambiar el estado), para esto usamos modificadores de visibilidad.
+El estado del objeto solo se manipula mediante la interfaz pública.
+
+Ej donde no hay encapsulamiento:
+class Account(var balance: Int)
+
+val a = new Account(100)
+
+Podemos hacer a.balance = -5000 y modificamos el estado de a
+
+
+Ej donde si hay encapsulamiento:
+class Account(initial: Int):
+  private var balance: Int = initial
+
+  def deposit(amount: Int): Unit =
+    if amount > 0 then balance += amount
+
+  def withdraw(amount: Int): Unit =
+    if amount > 0 && amount <= balance then balance -= amount
+
+  def currentBalance: Int = balance
+
+Ya no podemos hacer a.balance = -5000 porque balance es privado.
+
+
+
+Interfaz pública: NO es lo mismo que la interfaz que hemos visto (trait), sabemos que un trait es un contrato de lo que deben hacer las clases que las usan con extends, mientras que una interfaz pública es el conjunto de miembros de una clase que son accesibles desde fuera de la clase, es decir, lo que un externo puede usar del objeto instanciado de esa clase.
+La interfaz pública no tiene una def explicita como el trait.
+
+En UML, los miembros que pertenecen a la interfaz pública (los métodos, atributos, etc.) se ponen con un +. Ejemplo en Ipad.
+
+
+
+Modificadores de visibilidad: Permite controlar el acceso a datos internos de un objeto instanciado de una clase. Hay tres modificadores
+
+*private: Solo el código escrito dentro de esa clase puede usar ese miembro, la forma de usarlo es poner private antes de la def del miembro.
+Ej: 
+class Account(private val balance: Int):
+  def isRicherThan(other: Account): Boolean =
+    this.balance > other.balance  
+
+
+*protected: Lo mismo que private pero el código escrito dentro de las subclases también pueden usar ese miembro, la forma de usarlo es poner protected antes de la def del miembro.
+Ej:
+class Document(protected val title: String):
+  private val code: Int = title.length
+
+  protected def formatTitle(): String = s"[$title]"
+
+  def describe(): String = formatTitle()   // ok: dentro de la propia clase
+
+class Report(reportTitle: String) extends Document(reportTitle):
+  def internalLabel: String = title          
+  def label(): String = formatTitle() + "!"  
+ 
+
+*public: Cualquier código puede usar ese miembro, la forma de usarlo es simplemente definir la variable de forma normal.
+
+
+
+Invariante: Es una condición lógica que debe cumplirse siempre para que el objeto que es instancia de la clase sea válido.
+Ej: Si tenemos una class para cuentas bancarias, el invariante es que el balance nunca debe ser negativa.
+
+Al usar modificadores de visibilidad podemos conservar el invariante pues se restringe el acceso a miembros de la clase.
+Ej:
+//como balance es privado, desde afuera de la clase nadie lo puede modificar, conserva el invariante
+class BankAccount(private var balance: Int):
+
+  //Solo suma si amount>0, asegura el invariante
+  def deposit(amount: Int): Unit =
+    if amount > 0 then balance += amount
+
+  //Solo resta si balance queda no negativo, asegura el invariante
+  def withdraw(amount: Int): Unit =
+    if amount > 0 && amount <= balance then balance -= amount
+
+  //Permite leer el balance, lo necesitamos porque como balance es private ya no podemos hacer .balance ni para leer ni para modificar (es un getter, ya lo veremos)
+  def getBalance: Int = balance
+
+
+
+Acoplamiento: Es la dependencia fuerte entre dos clases o módulos. Si la clase A sabe demasiado sobre cómo está hecha la clase B, están muy acopladas. Recordar que queremos bajo acoplamiento.
+
+Al usar modificadores de visibilidad podemos reducir el acoplamiento pues se obliga a las clases a depender solo de la interfaz pública.
+Ej donde hay alto acoplamiento:
+class Order:
+  val items = mutable.ListBuffer[String]()
+
+@main def orderMain(): Unit =
+  val order = new Order
+  order.items += "Pizza"
+
+La parte del main accede directamente al ítems.
+
+Ej donde hay bajo acoplamiento:
+class Order:
+  private val items = mutable.ListBuffer[String]()
+  def addItem(item: String): Unit = items += item
+
+@main def orderMain(): Unit =
+  val order = new Order
+  order.addItem("Pizza")
+
+Ahora la parte del main no accede al item, sino que usa un método que es público, es decir, es parte de la interfaz pública.
+
+
+
+Métodos accesores: Sabemos que no es buena idea que fuera del código de la clase se pueda acceder a los datos internos de un objeto instanciado de una clase (atributos), modificarlos y así, por eso planteamos el concepto de encapsulamiento.
+Pero si queremos leer o modificar esos datos internos (atributos) ¿Qué hacemos? para eso están los métodos accesores, que son una forma más segura de leer o actualizar los datos internos de un objeto instanciado de una clase.
+Hay dos métodos accesores
+*Getter, su firma es def getX(): T, donde X es algún dato interno que dejamos que se pueda leer desde fuera de forma segura y T es su tipo (Lee)
+*Setter, su firma es def setX(x: T): Unit, donde X y x  es algún dato interno que dejamos que se pueda modificar desde fuera de forma segura y T es su tipo (Modifica)
+
+Donde Setter debe tener validaciones para mantener el invariante.
+Ej:
+class User(private var name: String,
+ private var age: Int):
+
+ //Getters
+ def getName(): String = name
+ def getAge(): Int = age
+
+ //Setters (con validación de que el nombre nunca puede ser vacío y la edad nunca debe ser negativa)
+ def setName(n: String): Unit =
+   if n.nonEmpty then name = n
+ def setAge(a: Int): Unit =
+   if a >= 0 then age = a
+
+Una regla importante es que si el dato interno que queremos leer o modificar es una estructura mutable (Ej: ListBuffer, Array, ArrayBuffer), hay que devolver una copia (puede ser inmutable) cuando se pida leer (en el caso del Getter) y copiar al recibir cuando se pida modificar (en el caso del Setter).
+Ej:
+class Order:
+ private val items = mutable.ListBuffer[String]()
+
+ def getItems(): List[String] =
+   //Evita filtrar la estructura mutable al exterior, así que devuelve una copia (hecha con el .toList)
+   items.toList
+ def addItem(i: String): Unit =
+   if i.nonEmpty then items += i
+
+
+
+Propiedades: Es una forma abreviada de declarar un dato interno con sus métodos accesores.
+Si el dato interno se define con 
+*val -> De forma automática, el compilador genera un getter 
+*var -> De forma automática, el compilador genera un getter y un setter
+
+Así, sea x el dato interno de tipo T
+*val x: T -> De forma automática, el compilador genera def x: T
+*var x: T -> De forma automática, el compilador genera un def x: T y un def x_=(value: T): Unit
+Nótese que el _ que se pone después del x en el setter es especial, esto es una convención en Scala que usa el compilador para definir un setter, pero si queremos llamar a ese método setter no es necesario poner el _.
+
+Ej de lo que escribimos:
+class User(var age: Int)
+
+Ej de lo que de forma automática genera el compilador:
+class User(private var _age: Int):
+ def age: Int = _age
+ def age_=(value: Int): Unit = _age = value
+
+Nótese que el dato interno pasa a ser private pues Scala de forma automática usa que los datos internos son privados (esto también pasa si hubiera sido val en vez de var).
+También al inicio del nombre del dato interno usa _, esto es por convención para diferenciarlo de la def del getter.
+
+Pero ¿Qué pasa si queremos agregar alguna validación? Sabemos que las validaciones en el setter son importantes para conservar el invariante pero de forma automática el compilador no genera validaciones.
+En ese caso, nosotros debemos escribir lo que el compilador debería generar de forma automática y además agregar las validaciones.
+
+Ej de lo que escribimos:
+class User(private var _age: Int):
+  def age: Int = _age
+  def age_=(value: Int): Unit =
+    if value >= 0 then _age = value   //ahora valida
+
+
+
+Principio de segregación de la interfaz: El cliente (código fuera de la clase) debe depender solo de la parte de la interfaz pública que usa, no de toda la interfaz pública, ¿Cómo hacemos eso? usando un trait que tenga solo la parte dela interfaz pública que se usa, donde el cliente debe usar ese trait.
+
+Ej de no uso del Principio de segregación:
+class Panel(val x: Int, val y: Int, val units: List[UnitsCommon]):
+  def nearbyPanels(): List[Panel] = ...
+
+//Cliente que solo necesita coordenadas, pero pide un Panel completo
+def distance(a: Panel, b: Panel): Int =
+  val dx = a.x - b.x
+  val dy = a.y - b.y
+  dx * dx + dy * dy
+
+
+Ej de uso del Principio de segregación:
+trait Positioned:
+  def x: Int
+  def y: Int
+
+class Panel(val x: Int, val y: Int, val units: List[UnitsCommon]) extends Positioned:
+  def nearbyPanels(): List[Panel] = ...
+
+//Cliente que solo necesita coordenadas, usa el trait
+def distance(a: Positioned, b: Positioned): Int =
+  val dx = a.x - b.x
+  val dy = a.y - b.y
+  dx * dx + dy * dy
+
+
+
+Principio de sustitución de Liskov: Sea B extends A, cualquier código escrito para A debe funcionar perfectamente si recibe un B, es decir, no solo debe compilar sino que debe comportarse tal y como si recibiera un A. Para este debemos asegurarnos de que B debe respetar el trait que tiene A, es decir,
+*B no puede exigir más para funcionar que lo que exige A
+*B debe garantizar al menos lo mismo que garantiza A
+*Debe preservar el invariante
+
+También se debe cumplir la regla de que al sobrescribir un método de una clase padre, la visibilidad no puede ser menor a la original. 
+Ej de lo que no se puede hacer: En A se define el método protected def foo(), luego en B se define el método override private def foo().
+
+Ej de lo que si se puede hacer: En A se define el método private def foo(), luego en B se define el método protected def foo(). Como en A def foo es private, no puedo usar override en B pues este no conoce que en A ya hay un foo().
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
