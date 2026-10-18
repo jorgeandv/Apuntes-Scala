@@ -1,0 +1,913 @@
+Materia SCALA---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Principio abierto-cerrado (OCP): Las clases, módulos, funciones, etc. deben estar hechos de tal forma de que se pueda añadir nuevo comportamiento sin modificar código ya existente.
+Es decir, deben ser abiertas a extensión, pero cerradas a modificación.
+
+Al usar el OCP se gana
+*Mantenibilidad: El código que ya testeamos se conserva, así que no hay que volver a testearlo
+
+*Extensibilidad: Podemos agregar nuevas variantes (nuevos casos o versiones de un mismo comportamiento) sin romper lo existente 
+Ej: Si calculamos el precio con descuento según el tipo de cliente, donde puede aparecer un cliente nuevo (estudiante, empresario, etc.), cada forma de calcular descuento es una variante
+
+*Confiabilidad: Se reducen errores al no tocar el código ya existente.
+
+Ej donde no se cumple el OCP:
+class Circle(val radius: Double)
+class Rectangle(val width: Double, val height: Double)
+
+def totalArea(shapes: List[Any]): Double =
+  var sum = 0.0
+  for shape <- shapes do
+    if shape.isInstanceOf[Rectangle] then
+      val rect = shape.asInstanceOf[Rectangle]
+      sum += rect.width * rect.height
+    else if shape.isInstanceOf[Circle] then
+      val circle = shape.asInstanceOf[Circle]
+      sum += math.Pi * math.pow(radius, 2)
+  sum
+
+El problema es que al agregar una nueva figura (variante), se necesita poner otro else if en el código, rompiendo el OCP.
+
+Ej donde sí se cumple el OCP:
+trait Shape:
+  val area: Double
+
+class Circle(val radius: Double) extends Shape:
+  override val area: Double = math.Pi * math.pow(radius, 2)
+
+class Rectangle(val width: Double, val height: Double) extends Shape:
+  override val area: Double = width * height
+
+def totalArea(shapes: List[Shape]): Double =
+  var sum = 0.0
+  for shape <- shapes do sum += shape.area
+  sum
+
+
+Ahora al agregar una nueva figura (variante) como por ejemplo un triángulo, solo basta con agregar una clase nueva, no tocamos el código ya existente
+
+class Triangle(val base: Double, val height: Double) extends Shape:
+  override val area: Double = base * height / 2
+
+
+
+Dispatch: Es el mecanismo por el cual, en tiempo de ejecución, se decide cuál implementación de un método se ejecuta.
+Utilizando el ejemplo anterior, cuando se hace shape.area, hay que elegir cuál versión del método area elegir, quien elige eso es el dispatch.
+
+El dispatch más común es el single dispatch, este mecanismo se basa en qué está antes del . (lo que llamamos receptor), es decir, si shape es un Circle usa el area del Circle, si shape es un Rectangle, shape usa el area del Rectangle.
+
+En lo anterior es donde entra el polimorfismo, pues este permite que muchas clases tengan el mismo método y el single dispatch elige (en ejecución) cuál implementación se usa.
+
+
+
+El problema del cachipun: Si queremos modelar el cachipun, se modela de la siguiente forma
+trait GameResult
+
+object Draw extends GameResult:
+  override def toString: String = "Draw"
+
+class Win(val hand: Hand) extends GameResult:
+  override def toString: String = s"Win: $hand"
+
+trait Hand:
+  def playWith(other: Hand): GameResult
+
+abstract class AbstractHand extends Hand:
+  override def toString: String =
+    getClass.getSimpleName
+
+class Stone extends AbstractHand:
+  override def playWith(other: Hand): GameResult =
+    if other.isInstanceOf[Stone] then Draw
+    else
+      new Win(
+        if other.isInstanceOf[Paper] then other
+        else this
+      )
+
+class Paper extends AbstractHand:
+  override def playWith(other: Hand): GameResult =
+    if other.isInstanceOf[Paper] then Draw
+    else
+      new Win(
+        if other.isInstanceOf[Scissors] then other 
+        else this
+      )
+
+class Scissors extends AbstractHand:
+  override def playWith(other: Hand): GameResult =
+    if other.isInstanceOf[Scissors] then Draw
+    else
+      new Win(
+        if other.isInstanceOf[Stone] then other 
+        else this
+      )
+
+En el modelamiento que hicimos, utilizamos polimorfismo y single dispatch, el problema ocurre cuando agregamos una nueva variante, por ejemplo la jugada lizard, si hacemos esto debemos modificar el código de cada clase Stone, Paper, Scissors agregando el caso de jugar contra un lizard, así que se rompe el OCP a pesar de que usamos polimorfismo y single dispatch.
+
+Sabemos que el single dispatch elige qué implementación usar según el receptor (depende de un objeto), pero en cachipun el resultado depende de dos objetos (mi jugada y la del rival), así que necesitamos lo que se llama double dispatch.
+
+
+
+Double dispatch con objetos iguales: Se necesita cuando el resultado de una operación depende de dos objetos, donde cada uno tiene una familia de tipos (Ej: Familia del primero es A,B,C,.. y la Familia del segundo es A,B,C,...), queremos un método distinto para cada combinación (Ej: A con A, A, con B, ...).
+
+La forma de hacerlo es 
+
+1) Definir una interfaz, donde ponemos un método de entrada (lo que llama el usuario) y un método especializado por cada tipo concreto (Se opera con A, Se opera con B, ...)
+trait Base:
+  def operar(other: Base): Resultado      // Método de entrada
+  def operarConA(other: A): Resultado     // Método especializado
+  def operarConB(other: B): Resultado     // Método especializado
+  def operarConC(other: C): Resultado     // Método especializado
+
+
+2) En cada clase concreta (tendremos una clase para cada tipo de la familia de tipos), el método de entrada se define para que invoque, sobre el objeto "other"  el método especializado correspondiente al tipo de la clase pasándole this como argumento
+class A extends Base:
+  override def operar(other: Base): Resultado = other.operarConA(this)   // en A: llama a operarConA
+
+class B extends Base:
+  override def operar(other: Base): Resultado = other.operarConB(this)   // en B: llama a operarConB
+
+class C extends Base:
+  override def operar(other: Base): Resultado = other.operarConC(this)   // en C: llama a operarConC
+
+
+3) En cada  clase concreta, se define cada método especializado por cada tipo de la familia de tipos posible.
+class A extends Base:
+  override def operar(other: Base): Resultado = other.operarConA(this)   // paso 2
+
+  override def operarConA(other: A): Resultado = "A.operar(A)"   // primero A, segundo A
+  override def operarConB(other: B): Resultado = "B.operar(A)"   // primero B, segundo A
+  override def operarConC(other: C): Resultado = "C.operar(A)"   // primero C, segundo A
+
+class B extends Base:
+  override def operar(other: Base): Resultado = other.operarConB(this)   // paso 2
+
+  override def operarConA(other: A): Resultado = "A.operar(B)"   // primero A, segundo B
+  override def operarConB(other: B): Resultado = "B.operar(B)"   // primero B, segundo B
+  override def operarConC(other: C): Resultado = "C.operar(B)"   // primero C, segundo B
+
+class C extends Base:
+  override def operar(other: Base): Resultado = other.operarConC(this)   // paso 2
+
+  override def operarConA(other: A): Resultado = "A.operar(C)"   // primero A, segundo C
+  override def operarConB(other: B): Resultado = "B.operar(C)"   // primero B, segundo C
+  override def operarConC(other: C): Resultado = "C.operar(C)"   // primero C, segundo C
+
+Así, tenemos que
+val a = new A
+val b = new B
+println(a.operar(b))   // A.operar(B)
+
+Primero, se ejecuta operar de A, que hace b.operarConA(a)
+   (primer single dispatch: se resuelve según el tipo de a)
+
+Segundo, b.operarConA(a) ejecuta el operarConA de B
+   (segundo single dispatch: se resuelve según el tipo de b)
+
+Tercero, el resultado es "A.operar(B)"
+   (ya se conocen los dos tipos, sin isInstanceOf))
+
+
+
+Double dispatch con el cachipun:
+trait GameResult
+
+object Draw extends GameResult:
+  override def toString: String = "Draw"
+
+class Win(val hand: Hand) extends GameResult:
+  override def toString: String = s"Win: $hand"
+
+trait Hand:
+  // Método de entrada de 1er dispatch
+  def playWith(other: Hand): GameResult
+  // Métodos especializados de 2do dispatch
+  def playWithPaper(other: Paper): GameResult
+  def playWithScissors(other: Scissors): GameResult
+  def playWithStone(other: Stone): GameResult
+
+abstract class AbstractHand extends Hand:
+  override def toString: String =
+    getClass.getSimpleName
+
+class Stone extends AbstractHand:
+  override def playWith(other: Hand): GameResult =
+    other.playWithStone(this) // Double dispatch
+
+  override def playWithPaper(other: Paper): GameResult =
+    new Win(other)
+
+  override def playWithScissors(other: Scissors): GameResult =
+    new Win(this)
+
+  override def playWithStone(other: Stone): GameResult =
+    Draw
+
+class Paper extends AbstractHand:
+  override def playWith(other: Hand): GameResult =
+    other.playWithPaper(this) // Double dispatch
+
+  override def playWithPaper(other: Paper): GameResult =
+    Draw
+
+  override def playWithScissors(other: Scissors): GameResult =
+    new Win(other)
+
+  override def playWithStone(other: Stone): GameResult =
+    new Win(this)
+
+class Scissors extends AbstractHand:
+  override def playWith(other: Hand): GameResult =
+    other.playWithScissors(this) // Double dispatch
+
+  override def playWithPaper(other: Paper): GameResult =
+    new Win(this)
+
+  override def playWithScissors(other: Scissors): GameResult =
+    Draw
+
+  override def playWithStone(other: Stone): GameResult =
+    new Win(other)
+
+
+
+Ventajas y desventajas del double dispatch: La principal ventaja es que se cumple el OCP y la principal desventaja es que cada nueva variante obliga a declarar múltiples métodos especializados (por ende, mientras más variantes más métodos hay).
+
+
+
+Double dispatch con objetos distintos (con Ejemplo): Se necesita cuando el resultado de una operación depende de dos objetos, donde cada uno tiene una familia de tipos (Ej: Familia del primero es A,B,C,.. y la Familia del segundo es D,E,F,...), queremos un método distinto para cada combinación (Ej: A con D, A, con E, ...).
+
+La forma de hacerlo es 
+
+1) Definir una interfaz para cada familia de tipos, donde debemos decidir cuál familia es la encargada del primer single dispatch, es decir, la que tiene al tipo que se usa como receptor del primer single dispatch. 
+Esa familia debe solo tener en su trait el método de entrada (lo que llama el usuario), mientras que la otra familia debe tener en su trait los métodos especializados.
+
+El ejemplo que usaremos es la familia Attack {Fire, Ice, Poison, ...} con la familia Armor {Cloth, Leather, Steel, ...}, donde queremos hacer outcome(Attack, Armor): Double, y nos dan una tabla de los casos según las elecciones de ataques y armaduras.
++--------+-------+---------+-------+
+|        | Cloth | Leather | Steel |
++--------+-------+---------+-------+
+| Fire   | x 1.2 | x 1.0   | x 0.5 |
+| Ice    | x 0.8 | x 1.1   | x 1.0 |
+| Poison | x 1.0 | x 1.3   | x 0.2 |
++--------+-------+---------+-------+
+
+El primer single dispatch debe ser de la forma attack.vs(armor), esto tiene sentido porque el ataque inicia y la armadura recibe (el receptor es attack)
+El segundo single dispatch debe ser de la forma armor.defendFromX(attack),  esto tiene sentido porque después del primer dispatch conocemos el tipo del ataque pero no el de la armadura (el receptor es armor).
+
+trait Attack:
+ def vs(armor: Armor): Double
+
+trait Armor:
+ def defendFromFire(attack: Fire): Double
+ def defendFromIce(attack: Ice): Double
+ def defendFromPoison(attack: Poison): Double
+
+
+2) En cada clase concreta de la familia con el trait del método de entrada, el método de entrada se define para que invoque, sobre el objeto "other" el método especializado correspondiente al tipo de la clase pasándole this como argumento 
+class Fire extends Attack:
+ override def vs(armor: Armor): Double =
+ armor.defendFromFire(this)
+
+class Ice extends Attack:
+ override def vs(armor: Armor): Double =
+ armor.defendFromIce(this)
+
+class Poison extends Attack:
+ override def vs(armor: Armor): Double =
+ armor.defendFromPoison(this)
+
+
+3) En cada clase concreta de la familia con el trait de los métodos especializados, se define cada método especializado por cada tipo de la familia de tipos posible.
+class Cloth extends Armor:
+ override def defendFromFire(attack: Fire): Double = 1.2
+ override def defendFromIce(attack: Ice): Double = 0.8
+ override def defendFromPoison(attack: Poison): Double = 1.0
+
+class Leather extends Armor:
+ override def defendFromFire(attack: Fire): Double = 1.0
+ override def defendFromIce(attack: Ice): Double = 1.1
+ override def defendFromPoison(attack: Poison): Double = 1.3
+
+class Steel extends Armor:
+ override def defendFromFire(attack: Fire): Double = 0.5
+ override def defendFromIce(attack: Ice): Double = 1.0
+ override def defendFromPoison(attack: Poison): Double = 0.2
+
+
+En el caso anterior vemos que se repite el defendFromPoison, defendFromFire, defendFromIce con 1.0 así que podemos definir una clase padre
+class BaseArmor protected extends Armor:
+ override def defendFromFire(attack: Fire): Double = 1.0
+ override def defendFromIce(attack: Ice): Double = 1.0
+ override def defendFromPoison(attack: Poison): Double = 1.0
+
+class Cloth extends BaseArmor:
+ override def defendFromFire(attack: Fire): Double = 1.2
+ override def defendFromIce(attack: Ice): Double = 0.8
+
+class Leather extends BaseArmor:
+ override def defendFromIce(attack: Ice): Double = 1.1
+ override def defendFromPoison(attack: Poison): Double = 1.3
+
+class Steel extends BaseArmor:
+ override def defendFromFire(attack: Fire): Double = 0.5
+ override def defendFromPoison(attack: Poison): Double = 0.2
+
+
+
+Excepciones: En C al manejar archivos ya vimos que para manejar los errores hay que poner muchos if y muchos returns (Ej: Tarea 4 de C), esto es malo porque tener muchos returns implica que hay que testear muchas cosas y a medida que se manejan más errores, el código se hace más ilegible.
+
+Lo ideal sería tener un camino feliz (happy path) donde se pone lo que pasa si todo sale bien (Ej: abrir el archivo, medir su tamaño, reservar su memoria, ...) y otra parte llamada excepciones que sea sólo el manejo de errores, de esta forma no mezclo el manejo de errores con el resto del código.
+
+Una excepción es un objeto que representa un evento excepcional que ocurre durante la ejecución (Ej: errores), este evento excepcional interrumpe el flujo del código y transfiere el control al sistema en tiempo de ejecución, ahí el sistema busca algún bloque de código que pueda manejar la situación, este bloque de código se llama manejador de excepciones.
+
+
+
+Throw y throwable: Ver en iPad
+
+
+
+Excepciones personalizadas: A veces las excepciones built-in (Ej: RuntimeException, NullPointerException, ...) no son suficientes, así que podemos definir excepciones personalizadas,
+la forma de hacerlo es 
+1) Definir el throw como una clase que extiende a Exception, donde la forma más común es 
+class nombreExcepción(message: String, cause: Throwable = null) extends Exception(message, cause)
+
+Ojo, se usa cause: Throwable = null porque la clase viene de Exception que proviene de Java, donde no existe Option
+
+Ej:
+class InvalidPortException(message: String, cause: Throwable = null) extends Exception(message, cause)
+
+2)Definir una función de validación que use la excepción
+
+Ej: 
+def validatePort(port: Int): Unit =
+ if port < 1024 || port > 65535 then
+   throw new InvalidPortException(s"Puerto fuera de rango: $port")
+
+
+
+Orden en los case: Primero hay que recordar que cuando tenemos una clase A que extiende una clase B, cualquier objeto que se instancia a partir de la clase A es de tipo A y de tipo B, mientras que cualquier objeto que se instancie a partir de la clase B es de tipo B.
+
+Cuando en catch se usa más de un case, se leen los case de arriba hacia abajo, los case son de la forma case e: TipoDeExcepción, donde se entra en un case si el objeto que lanzó el catch (la excepción) tiene tipo de TipoDeExcepción.
+
+Ej:
+class BaseException extends Exception
+class DerivedException extends BaseException
+
+@main def example3(): Unit =
+ try throw new DerivedException
+ catch
+   case e: DerivedException => println("DerivedException")
+   case e: BaseException => println("BaseException")
+
+El objeto que lanzó el catch es de tipo DerivedException y de tipo BaseException (pues la clase DerivedException extiende a BaseException), así que se cae en el primer case (tipo DerivedException).
+
+Otro ej:
+class BaseException extends Exception
+class DerivedException extends BaseException
+
+@main def example4(): Unit =
+ try throw new DerivedException
+ catch
+   case e: BaseException => println("BaseException")
+   case e: DerivedException => println("DerivedException")
+
+El objeto que lanzó el catch es de tipo DerivedException y de tipo BaseException (pues la clase DerivedException extiende a BaseException), así que se cae en el primer case (tipo BaseException).
+
+
+
+case que lanza una excepción: Un case puede volver a lanzar una excepción (tener throw), si es que esa excepción no es capturada (no se tiene un "sub catch" que pueda atrapar a esta excepción), se puede provocar un error llamado "Exception in thread "main" (recordar que una vez que se cae en un case, el resto de case se descartan).
+
+Ej:
+class BaseException extends Exception
+class DerivedException extends BaseException
+
+@main def example4(): Unit =
+ try throw new DerivedException
+ catch
+    case e: DerivedException => throw e
+    case e: BaseException    => println("BaseException")
+
+1)Se lanza la excepción DerivedException y es capturada por el catch
+2)Se cae en el primer case
+3)El case lanza la misma excepción (usando throw e, donde e es la excepción que llegó al case)
+4)Como no hay otro try/catch afuera, la excepción que se lanzó sube por la pila de llamadas hasta el sistema y el programa termina con error "Exception in thread "main""
+
+
+
+Stack trace: Es el mensaje que imprime la JVM cuando una excepción no es atrapada por un catch.
+Ej:
+Exception in thread "main" cl.uchile.dcc.trycatch.DerivedException
+    at cl.uchile.dcc.trycatch.Exercise$package$.example5(Exercise.scala:32)
+    at cl.uchile.dcc.trycatch.example5.main(Exercise.scala:31)
+
+
+
+Zonas de memoria: Hay dos zonas
+*Pila de llamadas: Guarda los métodos en ejecución, cada llamada agrega un "marco" con sus variables locales, al terminar esa llamada, se quita
+*Heap: Guarda los objetos creados dinámicamente (new ...), los objetos viven ahí hasta que el recolector de basura los elimina 
+
+¿Qué pasa cuando ocurre una excepción?
+Esta se crea en el heap (recordar que una excepción es un objeto) y se propaga hacia arriba en la pila 
+
+En el iPad está mejor explicado el funcionamiento de la pila de llamadas.
+
+
+
+Buenas prácticas:
+*Que los case capturen una excepción específica (lo que hemos hecho).
+*Poner en el try solo la parte del código que puede fallar, no todo el código, el resto de código puede ir antes o después del try/catch.
+*Si no se puede manejar el error, conviene volver a lanzar una excepción pero ahora más específica y con algún mensaje útil.
+
+
+
+Malas prácticas:
+*Capturar cosas de la clase Error, esto es grave pues esos errores no son manejables y son fallos de los que el programa no debiera poder recuperarse.
+*Hacer catch vacíos, se pierde información.
+*Lanzar excepciones desde finally, pues como esto siempre se ejecuta, se termina pisando la excepción original
+
+
+
+Cuándo es mala idea usar excepciones: No siempre usar excepciones es la mejor forma de manejar errores, debemos considerar que una excepción puede afectar a la claridad y a la seguridad.
+
+*Claridad: Una excepción es un salto invisible, pues si miramos la firma de un método no vemos qué puede fallar, y al manejar una excepción el flujo del programa salta de un lugar a otro.
+*Seguridad: Si olvidamos atrapar la excepción, el programa se cae.
+
+Nos enfocamos en dos casos importantes del por qué ahí es mala idea usar excepciones, si se rompe el principio de Liskov o se rompe la transparencia referencial.
+
+
+
+Romper el Principio de Liskov: Recordemos que el principio de Liskov es "Sea B extends A, cualquier código escrito para A debe funcionar perfectamente si recibe un B, es decir, no solo debe compilar sino que debe comportarse tal y como si recibiera un A".
+Una excepción rompe esto cuando B lanza una excepción donde A no la lanzaba.
+
+Ej:
+trait Almacen:
+  def guardar(x: Int): Unit
+
+class AlmacenNormal extends Almacen:
+  override def guardar(x: Int): Unit =
+    println(s"Guardado: $x")
+
+class AlmacenSoloLectura extends Almacen:
+  override def guardar(x: Int): Unit =
+    throw new UnsupportedOperationException("Este almacén es de solo lectura")
+
+def respaldar(almacen: Almacen): Unit =
+  almacen.guardar(10)
+  almacen.guardar(20)
+  println("respaldo listo")
+
+@main def demo(): Unit =
+  respaldar(new AlmacenNormal)        // funciona
+  respaldar(new AlmacenSoloLectura)   // lanza UnsupportedOperationException
+
+Tenemos que A es Almacen y B es AlmacenSoloLectura y AlmacenNormal, vemos que si usamos el método guardar con AlmacenNormal, no hay problema pero si usamos el método guardar con AlmacenSoloLectura se lanza una excepción.
+
+Esto rompe el Principio de Liskov porque se supone que cualquier código escrito para Almacen debería funcionar perfectamente si se recibe AlmacenNormal y AlmacenSoloLectura, pero esto solo se cumple con AlmacenNormal.
+
+
+
+Romper la transparencia referencial: La transparencia referencial es que una expresión es transparente si se puede reemplazar por su valor sin cambiar el comportamiento del programa.
+Ej: 2+3 es 5, entonces donde aparezca 2+3 podemos poner 5 y no se cambia el comportamiento del programa
+Una excepción no se comporta como un valor, así que pueden romper la transparencia referencial
+
+Ej:
+def failingFn(): Int =
+  val y: Int =
+    throw Exception("fail!")
+  try
+    val x = 62 + 5
+    x + y
+  catch
+    case e: Exception => 42
+
+El throw lanza la excepción y esta no es capturada por nadie pues se lanza fuera del try/catch, así que se termina en el error "Exception in thread "main"".
+
+def failingFn(): Int =
+  try
+    val x = 62 + 5
+    x + (throw Exception("fail!")).asInstanceOf[Int]
+  catch
+    case e: Exception => 42
+
+Ahora se reemplazó el valor del y (el throw) por el y que está dentro del try, donde ahora el throw lanza una excepción y esta sí es capturada por el catch, produciendo que tome el valor de 42, y el programa no falla.
+
+Vemos que al reemplazar por el valor, sí se cambió el comportamiento del programa y por ende falló la transparencia referencial.
+
+
+
+Polimorfismo ad-hoc: Recordemos, el polimorfismo que habíamos visto es por herencia
+Ej: 
+trait Shape:
+  def area: Double
+
+class Circle extends Shape:
+  def area = ...        // versión del círculo
+
+class Rectangle extends Shape:
+  def area = ...        // versión del rectángulo
+
+El polimorfismo ad-hoc es sin herencia y sobre una misma clase, es poder tener varios métodos con el mismo nombre pero distinta firma 
+Ej:
+class Canvas:
+  def paint(p: Point): Unit = ...
+  def paint(t: Triangle): Unit = ...
+
+Qué versión usar se decide en compilación, según el tipo de los argumentos.
+
+Ej que usa polimorfismo por herencia y polimorfismo ad-hoc:
+class Animal:
+  def hablar(): String = "..."
+
+class Perro extends Animal:
+  override def hablar(): String = "Guau"      // subtipos: misma firma, otra clase
+
+class Gato extends Animal:
+  override def hablar(): String = "Miau"      // subtipos
+
+class Mascota:
+  def alimentar(a: Perro): Unit = println("Croquetas")   // overloading: misma clase, distintos parámetros
+  def alimentar(a: Gato): Unit = println("Pescado")      
+
+
+
+Otras formas de clasificar el polimorfismo: Hasta ahora hemos clasificado el polimorfismo según qué tipo de mecanismo usa (herencia (subtipos), ad-hoc, ...) pero también se puede clasificar por cuándo se decide qué código se ejecuta, es decir, en ejecución o en compilación.
+
+*Runtime polymorphism: Se elige qué implementación usar en tiempo de ejecución. Ej: Polimorfismo por herencia (subtipos)
+
+*Static polymorphism: Se elige qué implementación usar en tiempo de compilación. Ej: Polimorfismo ad-hoc
+
+
+
+El problema de usar Any:
+class Cell(private var _element: Any):
+  def element: Any = _element	//getter
+  def element_=(e: Any): Unit = _element = e	//setter
+
+En el código anterior usamos que element es de tipo Any (recordar familia de tipos), es decir, se puede usar cualquier tipo
+val c = Cell(42)	//funciona
+c.element = "hola"     // funciona
+c.element = true        // funciona
+
+El problema es que el compilador solo sabe que es un Any, pero no sabe específicamente qué tipo es
+val c = Cell(42)
+val n: Int = c.element       // ERROR de compilación: Any no es Int (Int sí es Any)
+
+Para hacer lo anterior deberíamos castear de forma manual para decirle al compilador que confíe en nosotros
+val n: Int = c.element.asInstanceOf[Int]   
+
+Lo anterior compila, pero es peligroso porque el compilador no revisa el cast, si c es otro tipo distinto a Int, falla en ejecución
+
+val c = Cell(42)
+c.element = "hola"                         // nadie lo impide: el setter acepta Any
+val n: Int = c.element.asInstanceOf[Int]   // compila sin problemas, dará error en tiempo de ejecución
+println(n + 1)                             // nunca se ejecuta
+
+
+
+Polimorfismo paramétrico: Permite escribir código reutilizable y genérico que funciona con cualquier tipo, donde escribimos la clase una sola vez y sirve para Int, String, Boolean, ..., dando la misma flexibilidad del Any pero con la diferencia de que ahora el compilador sí conoce el tipo real en cada instancia.
+
+La base es usar un parámetro de tipo, el cual en vez de recibir un valor recibe un tipo, este se escribe entre corchetes al final del nombre de la clase y debe ser el tipo del parámetro de la clase.
+Ej:
+class Cell[T](private var _element: T):
+  def element: T = _element
+  def element_=(e: T): Unit = _element = e
+
+En lo anterior, T es el parámetro de tipo, donde T puede ser Int, String, Boolean, ...
+
+val c1 = Cell[Int](42)         // aquí T = Int
+val c2 = Cell[String]("Hello") // aquí T = String
+
+De esta forma, garantizamos que el tipo se mantiene consistente en todo el código sin tener que usar cast y por ende no tendremos errores en ejecución.
+
+def overwriteElement(c: Cell[String]): Unit =
+  c.element = 2    // Esto no compila porque el setter es def element_=(e: String): Unit
+
+@main def testCell(): Unit =
+  val c = new Cell[String]("Hello")
+  overwriteElement(c)
+  val s: String = c.element	//Compila bien, sin necesitar cast
+  println(s.toUpperCase)
+
+
+
+Polimorfismo paramétrico en un trait: Usar un parámetro de tipo en un trait permite que ese trait diga con qué tipo de datos se trabaja, sin fijar un tipo concreto y sin usar Any.
+
+Ej sin usar parámetro de tipo:
+trait ListOfInt:
+  def head: Int
+  def tail: ListOfInt
+
+trait ListOfString:
+  def head: String
+  def tail: ListOfString
+// ...y así para cada tipo
+
+Ej usando parámetro de tipo:
+trait ListOf[T]:
+  def head: T
+  def tail: ListOf[T]
+
+En lo anterior, podemos usar el contrato como 
+
+//Clase de una lista con cabeza y cola
+class Cons[T](_head: T, _tail: ListOf[T]) extends ListOf[T]:
+  override def head: T = _head
+  override def tail: ListOf[T] = _tail
+
+//Clase de una lista vacía (se lanza excepción en ambos métodos)
+class Nil[T] extends ListOf[T]:
+  override val head: T =
+    throw new NoSuchElementException("Nil.head")
+  override val tail: ListOf[T] =
+    throw new NoSuchElementException("Nil.tail")
+
+Lo anterior se puede usar como (especificando parámetros de tipo)
+
+//Indicamos que la lista es de Int tanto en la declaración (val l: ListOf[Int]) como en la def (new Cons[Int], new Nil[Int]))
+@main def main(): Unit =
+  val l: ListOf[Int] = new Cons[Int](1,
+    new Cons[Int](2,
+      new Cons[Int](3,
+        new Nil[Int])))
+  println(l.tail.tail.head)        // 3
+  println(l.tail.tail.tail.tail)   // Exception: Nil.tail
+
+Lo anterior se puede usar como (inferencia de parámetros de tipo)
+
+//Indicamos que la lista es de Int en la declaración (val l: ListOf[Int]) pero Scala infiere que cada Cons es de Int y el Nil es de Int
+//¿Cómo lo infiere? Como el primer argumento del Cons es un Int, Scala infiere que T=Int, luego new Nil no recibe ningún valor, así que Scala deduce por el contexto que como 
+//se tiene ListOf[Int] entonces el Nil debe ser Nil[Int]
+@main def main(): Unit =
+  val l: ListOf[Int] = new Cons(1,
+    new Cons(2,
+      new Cons(3,
+        new Nil)))
+  println(l.tail.tail.head)        // 3
+  println(l.tail.tail.tail.tail)   // Exception: Nil.tail
+
+
+
+Usar más de un parámetro de tipo: Es mejor verlo con un ejemplo
+trait MapOf[K, V]:
+  def get(key: K): Option[V]	//Devuelve Some(valor) si la clave existe o devuelve None si no existe (usando Option[] evitamos poner una excepción)
+  def put(key: K, value: V): MapOf[K, V]
+
+Tenemos que un mapa (diccionario) asocia claves con valores, donde la clave puede ser de un tipo (K) y el valor puede ser de otro tipo (V).
+
+//Implementación simple: guarda los pares en una lista (inmutable)
+class ListMap[K, V](private val entries: List[(K, V)]) extends MapOf[K, V]:
+
+  override def get(key: K): Option[V] =
+    entries.find(pair => pair._1 == key).map(pair => pair._2)
+
+  override def put(key: K, value: V): MapOf[K, V] =
+    // Quita la clave si ya existía y agrega el par nuevo
+    val sinClave = entries.filterNot(pair => pair._1 == key)
+    new ListMap(sinClave :+ ((key, value)))
+
+  override def toString: String =
+    entries.map(pair => s"${pair._1} -> ${pair._2}").mkString("Map(", ", ", ")")
+
+@main def demo(): Unit =
+  val m: MapOf[String, Int] = new ListMap[String, Int](List())
+
+  println(m.put("x", 42))       // Map(x -> 42)   (el ejemplo de la diapositiva)
+
+
+
+
+Ejercicio simple: Implementar una clase genérica para representar pares de valores donde los dos valores no necesitan ser del mismo tipo y se debe incluir un método swap que retorne un nuevo par con el orden de los parámetros intercambiados
+
+class Pair[A, B](val left: A, val right: B):
+  def swap(): Pair[B, A] =
+      new Pair(right, left)
+
+
+
+Ejercicio intermedio: Queremos representar el resultado de buscar una figura en un catálogo
+trait LookupResult[T]:
+  def isFound: Boolean
+  def get: T
+  def getOrElse(default: T): T
+
+//Cuando se encuentra el valor de tipo T
+class Found[T](val value: T) extends LookupResult[T]:
+  override def isFound = true
+  override def get = value
+  override def getOrElse(default: T) = value      //ignora el default
+
+//Cuando no se encuentra el valor de tipo T pero recuerda qué tipo esperaba
+class Missing[T] extends LookupResult[T]:
+  override def isFound = false
+  override def get = throw new NoSuchElementException("Missing.get")
+  override def getOrElse(default: T) = default    //usa el default
+
+Nótese que definimos el getOrElse a mano.
+
+El problema de lo anterior es que si hacemos
+val result: LookupResult[Circle] = new Missing[Circle]
+val shape: Shape = result.getOrElse(new Rectangle(10.0, 20.0))
+
+El programa no compila, porque getOrElse exige default: T y T = Circle pero le estamos pasando un Rectangle, así que a pesar de que el código tiene sentido pues queremos que por defecto se devuelva Rectangle(10.0, 20.0), esto no compila.
+
+La solución es usar límites de tipos.
+
+
+
+Subtipo y Supertipo:
+*A es subtipo de B cuando un valor de tipo A puede usarse en cualquier lugar donde se espera un B
+A <: B
+*B es supertipo de A cuando B puede ser reemplazado por A en cualquier contexto (subtipo al revés)
+B >: A
+
+
+Límites de tipos: Un límite restringe qué tipos se pueden pasar como parámetros de un tipo, hay dos límites
+*Límite superior: T<:A significa T debe ser A o un subtipo de A
+*Límite inferior: T>:A significa T debe ser A o un supertipo de A
+
+Acá vamos a tener dos parámetros, el parámetro de la clase y el parámetro del método.
+*El parámetro de la clase se crea cuando se crea el objeto, no cambia durante su vida
+*El parámetro del método se crea cada vez que se llama al método
+
+Ej :
+trait LookupResult[T]:
+  def isFound: Boolean
+  def get: T
+  def getOrElse[S >: T](default: S): S
+
+//Cuando se encuentra el valor de tipo T
+class Found[T](val value: T) extends LookupResult[T]:
+  override def isFound = true
+  override def get = value
+  override def getOrElse[S >: T](default: S): S = value    //S es el parámetro del método (en cada llamada se puede dar un S distinto), ahora se acepta que S debe ser T o un supertipo de T
+
+//Cuando no se encuentra el valor de tipo T pero recuerda qué tipo esperaba
+class Missing[T] extends LookupResult[T]:
+  override def isFound = false
+  override def get = throw new NoSuchElementException("Missing.get")
+  override def getOrElse[S >: T](default: S): S = default  //S es el parámetro del método (en cada llamada se puede dar un S distinto), ahora se acepta que S debe ser T o un supertipo de T
+
+Ahora si hacemos 
+val result: LookupResult[Circle] = new Missing[Circle]
+val shape: Shape = result.getOrElse(new Rectangle(10.0, 20.0))
+
+El programa sí compila porque el getOrElse exige default S donde S debe ser Circle o un supertipo de Circle y le estamos pasando Rectangle que Scala infiere que es un Shape, el cual es un supertipo de Circle.
+
+
+
+Clase que usa su propio tipo (Con ejemplo):
+trait Copyable[T]:
+  //métodos que trabajan con T
+  def copy(): T
+
+class ConcreteCopyable extends Copyable[ConcreteCopyable]:
+  //T = ConcreteCopyable aquí (auto-referencia)
+  override def copy(): ConcreteCopyable = ...
+
+
+
+Subtipado nominativo: La relación de subtipado se declara explícitamente usando extends y/o with.
+Ej: trait T2 extends T3 with T4, es decir, T2 <: T3,  T2 <: T4, donde si T3 <: T1, entonces T2 <: T1
+
+
+
+Subtipado subestructural v1: En scala, las funciones pueden almacenarse en variables, usarse como valor de retorno y pasarse como argumentos a otras funciones, así que las funciones también tienen tipos.
+El tipo de una función se define como tipoQueRecibe => tipoQueRetorna
+Ej: Una función es de tipo Int => Int si recibe un Int y retorna un Int
+
+
+
+Ej de función que recibe una función: Ipad
+
+
+
+Covariante y Contravariante: Si tenemos A <: B, si metemos esos tipos dentro de una construcción como un par (_,_) o dentro de una función _=>_, hay que preguntarse ¿La relación entre las construcciones van en el mismo sentido o al revés?, donde tenemos dos formas
+
+*Si van en el mismo sentido, decimos que la construcción es covariante, es decir, la construcción con A es subtipo de la construcción con B (mismo sentido). 
+Ej: A <: B implica (A, X) <: (B, X)
+
+*Si van en sentido contrario, decimos que la construcción es contravariante, es decir, la construcción con B es subtipo de la construcción con A (sentido contrario)
+Ej: A <: B  implica  (B => X) <: (A => X)
+
+
+
+Genérico: También llamado tipo genérico, es un tipo que está parametrizado por otro tipo, es decir, es lo que vimos con T.
+
+
+
+Subtipado subestructural v2: 
+Las funciones son contravariantes en su dominio (lo que reciben) y son covariantes en su codominio (lo que retornan), así 
+(B => C) <: (A => D) ssi A <: B ∧ C <: D
+
+La función de tipo (B => C) es subtipo de la función de tipo (A => D) si y solo si se cumplen las siguientes dos condiciones
+*A es subtipo de B
+*C es subtipo de D 
+
+
+
+Subtipado subestructural en pares: Un par es un valor que junta dos valores en uno solo, en un orden fijo. 
+Ej: val p = (3, "hola")   //Un par: primer componente Int, segundo String
+Otro ej: val x: (Animal, Cat) = (new Dog("Bond"), new Cat("Tom"))  //un par: primer componente Animal, segundo Cat
+
+Los pares son covariantes en ambos elementos del par.
+
+Así, (T1, T2) <: (T3, T4)  ssi   T1 <: T3  ∧  T2 <: T4
+
+El par de tipo (T1, T2) es subtipo de (T3, T4) si y solo si se cumplen las siguientes dos condiciones
+*T1 es subtipo de T3
+*T2 es subtipo de T4
+
+
+
+Subtipado subestructural con parámetro de tipo: Hay que saber que A <: B no implica de forma automática que List[A] <: List[B].
+
+En vez de ponernos en el caso de List[] podemos generalizar a cualquier construcción que use un parámetro (List[], Array[], ...), llamémosla construcción t.
+Sabiendo que A <: B, tenemos tres casos
+*Covariante: Si A <: B y T[A] <: T[B], entonces T es covariante en su parámetro
+*Contravariante: Si A <: B y T[B] <: T[A], entonces T es contravariante en su parámetro
+*Invariante: Si A <: B y T[A] no tiene relación con T[B], entonces T es invariante en su parámetro
+
+
+
+Subtipado en listas inmutables: En una lista inmutable el tipo sale (solo se leen elementos), así que son covariantes.
+
+
+
+Subtipado en listas mutables: En una lista mutable el tipo sale y entra (se leen y se insertan elementos), así que son invariantes.
+
+
+
+Subtipado de un genérico: Cuando usamos tipo genérico, se tiene que la clase que usa ese tipo genérico es invariante en su parámetro, pues una clase con tipo genérico puede tener métodos que lean, que escriban, o ambos, así que lo más seguro es asumir que es invariante.
+
+Ej de un problema de lo anterior:
+//Clase que usa el tipo genérico
+class Cell[T](var element: T):
+  def get(): T = element
+  def set(newElement: T): Unit = element = newElement
+
+
+def present(animal: Cell[Animal]) = animal.get().talk()
+
+@main def main(): Unit =
+  val dogCell = Cell(new Dog("Bond"))
+  present(dogCell)
+
+Lo anterior no compila porque a pesar de que Dog <: Animal, como usamos un tipo genérico, se tiene que Cell es invariante en su parámetro, por lo cual no hay relación entre Cell[Dog] y Cell[Animal].
+Luego, en el main se está usando present con un cell[Dog] pero el present espera recibir un cell[Animal], por lo cual no compila
+
+La solución a lo anterior es usar el limite de tipos.
+La idea es definir funciones con un parámetro de tipo T acotado por limites, así no se exige un tipo exacto.
+Con dos funciones, donde cada una permite obtener (usando .get()) el contenido de la celda
+
+//Clase que usa el tipo genérico
+class Cell[T](var element: T):
+  def get(): T = element
+  def set(newElement: T): Unit = element = newElement
+
+// Límite superior: T es Animal o un subtipo (Ej: T puede ser Dog, Cat, Animal)
+def unbox1[T <: Animal](animal: Cell[T]) = animal.get()
+
+// Límite inferior: T es Dog o un supertipo (Ej: T puede ser Dog, Animal, Any)
+def unbox2[T >: Dog](dog: Cell[T]) = dog.get()
+
+// Supuesto: versión de present con límite superior (Ej: T puede ser Dog, Cat, Animal)
+def present2[T <: Animal](animal: Cell[T]) = animal.get().talk()
+
+@main def main(): Unit =
+  val dogCell = Cell(new Dog("Bond"))
+  val d1: Dog = unbox1(dogCell)
+  val d2: Dog = unbox2(dogCell)
+  present2(dogCell).talk()
+
+Para arreglar el error basta con definir present2 (unbox1 y unbox2 son solo ejemplos para enseñar la diferencia entre ambos limites).
+
+
+
+Anotaciones de varianza en el parámetro de tipo: Son marcas que se ponen en el parámetro de tipo (+ o -) para decirle al compilador cómo se comporta en temas de varianza esa clase (la que tiene el parámetro de tipo). Donde, sea T el parámetro de tipo
+*+T: Es covariante
+*-T: Es contravariante
+*T: Es invariante -> No ponemos ni + ni -
+
+Ej:
+class Caja[+T]      // covariante:      si A <: B, entonces Caja[A] <: Caja[B]
+class Sumidero[-T]  // contravariante:  si A <: B, entonces Sumidero[B] <: Sumidero[A]
+class Cell[T]       // invariante:      Cell[A] y Cell[B] no se relacionan
+
+¿Cuándo usamos cada anotación?
+Depende de cómo se usa T dentro de la clase
+*La clase produce T, se usa +T
+Ej:
+class Caja[+T](val contenido: T):
+  def get: T = contenido          // T solo sale
+
+*La clase consume T, se usa -T
+Ej:
+trait Sumidero[-T]:
+  def recibir(x: T): Unit         // T solo entra
+
+Ej de error:
+class Mala[+T]:
+  def set(x: T): Unit = ()   // error: covariant type T occurs in contravariant position
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
